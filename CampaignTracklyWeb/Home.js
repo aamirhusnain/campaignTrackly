@@ -296,24 +296,7 @@ app.controller('myCtrl', function ($scope, $mdToast, $log, $mdDialog, $element) 
 
 
                 };
-                //function isValidBase64(str) {
-                //    try {
-                //        return btoa(atob(str)) === str;
-                //    } catch (error) {
-                //        return false;
-                //    }
-                //}
-
-
-                //const encodedApiKey = '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';
-
-                //if (isValidBase64(encodedApiKey)) {
-                //    const decodedApiKey = atob(encodedApiKey);
-                //    console.log(decodedApiKey);
-                //} else {
-                //    console.log('Invalid Base64-encoded string');
-                //}
-
+              
 
 
                 // Encryption function using AES
