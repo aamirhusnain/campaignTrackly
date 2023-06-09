@@ -1,4 +1,4 @@
-var app = angular.module('myApp', ['ngMaterial'], function ($mdThemingProvider) {
+﻿var app = angular.module('myApp', ['ngMaterial'], function ($mdThemingProvider) {
 
     $mdThemingProvider.theme('default')
         .primaryPalette('green', {
@@ -108,7 +108,8 @@ app.controller('myCtrl', function ($scope, $mdToast, $log, $mdDialog, $element) 
 
                             var cellAddrArr = cellAddress.split("!");
                             var Cell_Address = cellAddrArr[1];
-                          
+                            console.log(Cell_Address);
+                            console.log(cellValue);
 
 
                             if (cellValue != "") {

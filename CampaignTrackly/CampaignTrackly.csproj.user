@@ -9,5 +9,6 @@
     <GeneratedAppVersion>1.0.0.0</GeneratedAppVersion>
     <GeneratedClientSecret>2VX8WRqq2iUjlSbb574M1ZwZbdW51GLzlniXn6K3K9E=</GeneratedClientSecret>
     <OfficeAndSharePointStartAction>OfficeDesktopClient</OfficeAndSharePointStartAction>
+    <ProjectView>ProjectFiles</ProjectView>
   </PropertyGroup>
 </Project>
