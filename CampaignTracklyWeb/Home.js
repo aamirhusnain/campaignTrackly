@@ -1,4 +1,4 @@
-﻿var app = angular.module('myApp', ['ngMaterial'], function ($mdThemingProvider) {
+var app = angular.module('myApp', ['ngMaterial'], function ($mdThemingProvider) {
 
     $mdThemingProvider.theme('default')
         .primaryPalette('green', {
@@ -66,10 +66,156 @@ app.controller('myCtrl', function ($scope, $mdToast, $log, $mdDialog, $element) 
 
 
 
+        $scope.gptBtn = false;
+
+        function startGptLoader() {
+            document.getElementById("loaderGpt").style.display = 'block';
+            $scope.tooltipText = "Please wait";
+            $scope.gptBtn = true;
+            if (!$scope.$$phase) {
+                $scope.$apply();
+            };
+        };
+
+        function endGptLoader() {
+            document.getElementById("loaderGpt").style.display = 'none';
+            $scope.tooltipText = "Ask Chat GPT";
+            $scope.gptBtn = false;
+            if (!$scope.$$phase) {
+                $scope.$apply();
+            };
+        };
 
         Office.onReady(function () {
 
             try {
+
+                  /////////// Ask Question ///////////
+
+                $scope.chatGpt = function () {
+                    startGptLoader();
+                    Excel.run(function (context) {
+                        var sheet = context.workbook.worksheets.getActiveWorksheet();
+                        var range = context.workbook.getSelectedRange();
+                        range.load("address");
+                        range.load("values");
+
+                        return context.sync().then(function () {
+                            var cellValueArr = range.values;
+                            var cellValue = cellValueArr[0][0];
+
+                            var cellAddress = range.address;
+
+                            var cellAddrArr = cellAddress.split("!");
+                            var Cell_Address = cellAddrArr[1];
+                            console.log(Cell_Address);
+                            console.log(cellValue);
+
+
+                            if (cellValue != "") {
+                                  /////////// Chat with GPT ///////////
+
+                                var settings = {
+                                    "url": "https://api.openai.com/v1/chat/completions",
+                                    "method": "POST",
+                                    "timeout": 0,
+                                    "headers": {
+                                        "Content-Type": "application/json",
+                                        "Authorization": "Bearer " + $scope.ChatGPTKey
+                                    },
+                                    "data": JSON.stringify({
+                                        "model": "gpt-3.5-turbo",
+                                        "messages": [
+                                            {
+                                                "role": "user",
+                                                "content": cellValue
+                                            }
+                                        ],
+                                        "max_tokens": 2000,
+                                        "temperature": 0
+                                    }),
+                                };
+
+                                $.ajax(settings).done(function (response) {
+                                    var Answer = response.choices[0].message.content;
+
+                                  //  console.log(Answer);
+
+                                    var cellAddrRow = parseInt(Cell_Address.replace(/\D/g, ""));
+                                    var alphabets = Cell_Address.match(/[a-zA-Z]/g);
+                                    var nextCellRow = cellAddrRow + 1;
+                                    var nextRowAdd = alphabets + nextCellRow.toString();
+
+                                  //  console.log(nextRowAdd);
+
+
+                                    var NewRange = sheet.getRange(nextRowAdd); 
+                                    NewRange.values = [[Answer]];
+
+                                    NewRange.format.wrapText = true;
+                                    NewRange.format.columnWidth = 350;
+
+                                    return context.sync()
+                                        .then(function () {
+                                            NewRange.autofitColumns();
+                                            endGptLoader();
+
+
+                                            if (!$scope.$$phase) {
+                                                $scope.$apply();
+                                            };
+
+                                        }).catch(function (error) {
+                                            console.log("Error: " + error);
+                                            endGptLoader();
+                                        });
+
+                                 
+                                }).fail(function (error, xhr) {
+                                    console.log(error);
+                                    endGptLoader();
+                                    loadToast("Connection Issue. Please contact support@campaigntrackly.com");
+
+                                });
+
+
+
+                            } else {
+                                endGptLoader();
+                                loadToast("Please put data in cell.");
+
+                            };
+                        }).catch(function (error) {
+                            console.log("Error occurred during context sync: " + error);
+                            endGptLoader();
+                            loadToast("Cannot perform this operation while Excel is in editing mode.");
+                        });
+
+
+                    });
+
+
+
+
+
+
+                };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
                 function checkWordOrSentence(input) {
                     // Remove leading and trailing whitespace from the input
                     var trimmedInput = input.trim();
@@ -296,14 +442,31 @@ app.controller('myCtrl', function ($scope, $mdToast, $log, $mdDialog, $element) 
 
 
                 };
-              
+                //function isValidBase64(str) {
+                //    try {
+                //        return btoa(atob(str)) === str;
+                //    } catch (error) {
+                //        return false;
+                //    }
+                //}
+
+
+                //const encodedApiKey = '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';
+
+                //if (isValidBase64(encodedApiKey)) {
+                //    const decodedApiKey = atob(encodedApiKey);
+                //    console.log(decodedApiKey);
+                //} else {
+                //    console.log('Invalid Base64-encoded string');
+                //}
+
 
 
                 // Encryption function using AES
                 function encryptAPIKey(apiKey, encryptionKey) {
                     const encrypted = CryptoJS.AES.encrypt(apiKey, encryptionKey);
                     return encrypted.toString();
-                }
+                };
 
              
 
