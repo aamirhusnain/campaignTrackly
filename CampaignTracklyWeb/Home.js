@@ -1,4 +1,4 @@
-﻿var app = angular.module('myApp', ['ngMaterial'], function ($mdThemingProvider) {
+var app = angular.module('myApp', ['ngMaterial'], function ($mdThemingProvider) {
 
     $mdThemingProvider.theme('default')
         .primaryPalette('green', {
@@ -42,7 +42,7 @@ app.controller('myCtrl', function ($scope, $mdToast, $log, $mdDialog, $element) 
         }
 
         var BaseURL = "https://devapp.campaigntrackly.com";
-    //  var BaseURL = "https://app.campaigntrackly.com";
+     // var BaseURL = "https://app.campaigntrackly.com";
 
         /////////// show the started screen to user ///////////
         var checkUser = window.localStorage.getItem("UserVisted");
@@ -67,7 +67,7 @@ app.controller('myCtrl', function ($scope, $mdToast, $log, $mdDialog, $element) 
 
 
         $scope.gptBtn = false;
-
+        $scope.tooltipText = "Ask Chat GPT";
         function startGptLoader() {
             document.getElementById("loaderGpt").style.display = 'block';
             $scope.tooltipText = "Please wait";
@@ -86,14 +86,43 @@ app.controller('myCtrl', function ($scope, $mdToast, $log, $mdDialog, $element) 
             };
         };
 
+
+
+        var enterEvent = new KeyboardEvent("keydown", {
+            key: "Enter",
+            code: "Enter",
+            keyCode: 13,
+            charCode: 13,
+            bubbles: true
+        });
+
+     
+
         Office.onReady(function () {
 
             try {
+
+                // Attach event listener to detect key presses
+                //document.addEventListener('keydown', function (event) {
+                //    // Handle key press event here
+                //    console.log('Key pressed:', event.key);
+                //});
+
+
+                // Press the enter key programmatically
+
+                $scope.testClick = function () {
+
+                    document.dispatchEvent(enterEvent);
+
+                };
 
                   /////////// Ask Question ///////////
 
                 $scope.chatGpt = function () {
                     startGptLoader();
+
+
                     Excel.run(function (context) {
                         var sheet = context.workbook.worksheets.getActiveWorksheet();
                         var range = context.workbook.getSelectedRange();
@@ -108,12 +137,10 @@ app.controller('myCtrl', function ($scope, $mdToast, $log, $mdDialog, $element) 
 
                             var cellAddrArr = cellAddress.split("!");
                             var Cell_Address = cellAddrArr[1];
-                            console.log(Cell_Address);
-                            console.log(cellValue);
 
 
                             if (cellValue != "") {
-                                  /////////// Chat with GPT ///////////
+                                /////////// Chat with GPT ///////////
 
                                 var settings = {
                                     "url": "https://api.openai.com/v1/chat/completions",
@@ -137,19 +164,19 @@ app.controller('myCtrl', function ($scope, $mdToast, $log, $mdDialog, $element) 
                                 };
 
                                 $.ajax(settings).done(function (response) {
-                                    var Answer = response.choices[0].message.content;
+                                    var Answer = response.choices[0].message.content.trim();
 
-                                  //  console.log(Answer);
+                                    //  console.log(Answer);
 
                                     var cellAddrRow = parseInt(Cell_Address.replace(/\D/g, ""));
                                     var alphabets = Cell_Address.match(/[a-zA-Z]/g);
                                     var nextCellRow = cellAddrRow + 1;
                                     var nextRowAdd = alphabets + nextCellRow.toString();
 
-                                  //  console.log(nextRowAdd);
+                                    //  console.log(nextRowAdd);
 
 
-                                    var NewRange = sheet.getRange(nextRowAdd); 
+                                    var NewRange = sheet.getRange(nextRowAdd);
                                     NewRange.values = [[Answer]];
 
                                     NewRange.format.wrapText = true;
@@ -157,9 +184,8 @@ app.controller('myCtrl', function ($scope, $mdToast, $log, $mdDialog, $element) 
 
                                     return context.sync()
                                         .then(function () {
-                                            NewRange.autofitColumns();
+                                            NewRange.format.autofitColumns();
                                             endGptLoader();
-
 
                                             if (!$scope.$$phase) {
                                                 $scope.$apply();
@@ -170,7 +196,7 @@ app.controller('myCtrl', function ($scope, $mdToast, $log, $mdDialog, $element) 
                                             endGptLoader();
                                         });
 
-                                 
+
                                 }).fail(function (error, xhr) {
                                     console.log(error);
                                     endGptLoader();
@@ -196,22 +222,7 @@ app.controller('myCtrl', function ($scope, $mdToast, $log, $mdDialog, $element) 
 
 
 
-
-
-
                 };
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -248,6 +259,7 @@ app.controller('myCtrl', function ($scope, $mdToast, $log, $mdDialog, $element) 
                     var endpoint = 'https://api.openai.com/v1/chat/completions';
 
 
+                  //  var prompt = "Please spell check the following word: " + text + ". If the word is spelled correctly, return 'correct'. If the word is spelled incorrectly, but I know the correct spelling, return the correct spelling. If I do not know the correct spelling, return unknown."
                     var prompt = `The spelling of the word "` + text + `" is`;
                     // var prompt = `correct spelling '"${text}"' if incorrect then please correct it.`;
                     var data = {
@@ -269,36 +281,47 @@ app.controller('myCtrl', function ($scope, $mdToast, $log, $mdDialog, $element) 
                         data: JSON.stringify(data),
                         success: function (response) {
                             var reply = response.choices[0].message.content;
-                         //   console.log(response);
-                            var CheckSen = checkWordOrSentence(reply);
-                            var fullReply = removeDots(reply);
-                            if (fullReply != 'correct') {
 
-                                if (CheckSen === "sentence") {
-                                    var onlyWord = SeparatWord(fullReply);
+                            answerArr = reply.split('.');
+                            var unkownAns = answerArr[1].trim();
+                      //      console.log(unkownAns);
+                            if (unkownAns === 'It is not a recognized word in the English language' || unkownAns === "There is no such word in the English language") {
+                                loadToast("I am not sure what this word is, please try again");
+                            } else {
 
-                                } else {
-                                    var onlyWord = fullReply;
-                                };
+                                var CheckSen = checkWordOrSentence(reply);
+                                var fullReply = removeDots(reply);
+                                if (fullReply != 'correct') {
 
-                                if (onlyWord != '' && onlyWord != undefined) {
-
-                                    if (onlyWord.toLowerCase() != beforeWord.toLowerCase()) {
-                                        // underlineCell(adressOfCell);
-                                     //   console.log(onlyWord);
-                                        //  ProgressLinearInActive();
-                                        showActionToast("Spelling might need to be corrected? Thank you", onlyWord, adressOfCell);
-                                        //  showActionToast("Incorrect Spelling of " + onlyWord, onlyWord, adressOfCell);
-                                        //  showActionToast("We think this spelling " + beforeWord + " is incorrect and might need to be fixed, thank you", onlyWord, adressOfCell);
+                                    if (CheckSen === "sentence") {
+                                        var onlyWord = SeparatWord(fullReply);
 
                                     } else {
-                                        // ProgressLinearInActive();
+                                        var onlyWord = fullReply;
                                     };
+
+                                    if (onlyWord != '' && onlyWord != undefined) {
+
+                                        if (onlyWord.toLowerCase() != beforeWord.toLowerCase()) {
+                                            // underlineCell(adressOfCell);
+                                            //   console.log(onlyWord);
+                                            //  ProgressLinearInActive();
+                                            showActionToast("Spelling might need to be corrected? Thank you", onlyWord, adressOfCell);
+                                         } else {
+                                            // ProgressLinearInActive();
+                                        };
+                                    };
+                                } else {
+                                    //  ProgressLinearInActive();
+                                    //  console.log("Already Correct");
                                 };
-                            } else {
-                                //  ProgressLinearInActive();
-                              //  console.log("Already Correct");
+
+
+
                             }
+
+
+
                         },
                         error: function (error) {
                             console.error('Error:', error);
@@ -335,7 +358,7 @@ app.controller('myCtrl', function ($scope, $mdToast, $log, $mdDialog, $element) 
                         var wordForCheck = eventArgs.details.valueAfter;
                         if (wordForCheck.toLowerCase() != eventArgs.details.valueBefore.toLowerCase()) {
                             if (wordForCheck.toLowerCase() != "campaign name" && wordForCheck.toLowerCase() != "url" && wordForCheck.toLowerCase() != "content" &&
-                                wordForCheck.toLowerCase() != "terms" && wordForCheck.toLowerCase() != "source" && wordForCheck.toLowerCase() != "medium") {
+                                wordForCheck.toLowerCase() != "term" && wordForCheck.toLowerCase() != "source" && wordForCheck.toLowerCase() != "medium") {
 
                                 checkSpelling(wordForCheckSpell, eventArgs.details.valueBefore, address);
                          //       console.log("Change Value");
@@ -506,7 +529,7 @@ app.controller('myCtrl', function ($scope, $mdToast, $log, $mdDialog, $element) 
                                         const encryptedKey = encryptAPIKey($scope.ChatGPTKey, 'ChatGPTKey');
                                         console.log(encryptedKey);
 
-                                        window.localStorage.setItem('ChatGPTKey', encryptedKey);
+                                        window.localStorage.setItem('SecretKey', encryptedKey);
                                     },
                                     error: function (error) {
                                    //     console.log(error);
@@ -673,85 +696,6 @@ app.controller('myCtrl', function ($scope, $mdToast, $log, $mdDialog, $element) 
 
 
 
-                //function GetAllCustTags() {
-
-                //    //////////////////////// Get Custom Tags ////////////////////////
-
-                //    //$.ajax({
-                //    //    url: BaseURL + "/wp-json/campaigntrackly/v1/custom_tags_names",
-                //    //    method: "GET",
-                //    //    async: false,
-                //    //    headers: {
-                //    //        "accept": "application/json",
-                //    //        "Authorization": "Bearer " + APIToken
-                //    //    },
-                //    //    success: function (response) {
-                //    //        console.log(response);
-
-                //    //        for (let i = 0; i < response.length; i++) {
-                //    //            CustomTagAPI.push(response[i].custom.toLowerCase());
-                //    //        };
-
-
-                //    //    },
-                //    //    error: function (error) {
-                //    //        console.log(error);
-                //    //    }
-                //    //});
-
-
-
-
-                //    $.ajax({
-                //        url: BaseURL + "/wp-json/campaigntrackly/v1/tag_templates",
-                //        method: "GET",
-                //        async: false,
-                //        headers: {
-                //            "accept": "application/json",
-                //            "Authorization": "Bearer " + APIToken
-                //        },
-                //        success: function (response) {
-                //            //  console.log(response);
-                //            for (let i = 0; i < response.length; i++) {
-                //                //console.log(response[i].id);
-                //                if (response[i].id === $scope.SelectedOption.id) {
-                //                    SelctedTemTag = response[i].custom;
-                //                };
-                //            };
-
-                //            for (var m = 0; m < SelctedTemTag.length; m++) {
-                //                if (SelctedTemTag[m].title != null) {
-                //                    CustomTagAPI.push(SelctedTemTag[m].title.toLowerCase());
-
-                //                }
-                //            };
-
-                //            //  console.log(CustomTagAPI);
-                //        },
-                //        error: function (error) {
-                //            console.log(error);
-                //            ProgressLinearInActive();;
-
-
-                //            if (error.status != 200 && error.status != 500) {
-
-                //                if (error.responseJSON.statusCode === 403 && error.responseJSON.message === "Expired token") {
-                //                    RefreshToken(getFromLocal.refresh_token);
-                //                    GetAllCustTags();
-                //                } else {
-                //                    loadToast("Connection Issue. Please contact support@campaigntrackly.com");
-                //                }
-
-                //            } else {
-                //                loadToast("Connection Issue. Please contact support@campaigntrackly.com");
-                //            }
-
-                //        }
-                //    });
-
-
-                //};
-
 
 
 
@@ -766,7 +710,7 @@ app.controller('myCtrl', function ($scope, $mdToast, $log, $mdDialog, $element) 
                                 "Authorization": "Bearer " + APIToken
                             },
                             success: function (response) {
-                                console.log(response);
+                             //   console.log(response);
 
 
                                 for (let i = 0; i < response.length; i++) {
@@ -782,7 +726,7 @@ app.controller('myCtrl', function ($scope, $mdToast, $log, $mdDialog, $element) 
                                     }
                                 };
 
-                                console.log(CustomTagAPI);
+                             //   console.log(CustomTagAPI);
                                 resolve(response);
                             },
                             error: function (error) {
@@ -897,7 +841,7 @@ app.controller('myCtrl', function ($scope, $mdToast, $log, $mdDialog, $element) 
 
                                                 //////////////////////// Check Scenario ////////////////////////
 
-                                                if (headerList.includes("campaign name") && headerList.includes("url") && !headerList.includes('') && !headerList.includes("content") && !headerList.includes("terms") && !headerList.includes("source") && !headerList.includes("medium")) {
+                                                if (headerList.includes("campaign name") && headerList.includes("url") && !headerList.includes('') && !headerList.includes("content") && !headerList.includes("term") && !headerList.includes("source") && !headerList.includes("medium")) {
 
                                                     Scenario = "First Scenario";
 
@@ -948,7 +892,7 @@ app.controller('myCtrl', function ($scope, $mdToast, $log, $mdDialog, $element) 
                                                             indxOfContentTag = i;
                                                         } else if (headerList[i] === "medium") {
                                                             indxOfMedium = i;
-                                                        } else if (headerList[i] === "terms") {
+                                                        } else if (headerList[i] === "term") {
                                                             indxOfTerms = i;
                                                         } else if (headerList[i] === "source") {
                                                             indxOfSource = i;
@@ -1693,7 +1637,7 @@ app.controller('myCtrl', function ($scope, $mdToast, $log, $mdDialog, $element) 
                         // Handle any errors that occurred during the API call
                       //  console.log(error);
                     } finally {
-                        console.log("Finally")
+                     //   console.log("Finally")
                       //  ProgressLinearInActive(); // Stop the loader after the API call is complete
                     }
                 };
@@ -1760,7 +1704,7 @@ app.controller('myCtrl', function ($scope, $mdToast, $log, $mdDialog, $element) 
                     $scope.NavBarDiv = false;
                     $scope.StartedScreen = true;
 
-                    var getGptToken = window.localStorage.getItem('ChatGPTKey');
+                    var getGptToken = window.localStorage.getItem('SecretKey');
                     if (getGptToken != null) {
                         const decryptedKey = decryptAPIKey(getGptToken, 'ChatGPTKey');
                         $scope.ChatGPTKey = decryptedKey;
@@ -1815,7 +1759,7 @@ app.controller('myCtrl', function ($scope, $mdToast, $log, $mdDialog, $element) 
                     $scope.NavBarDiv = true;
 
                     window.localStorage.removeItem("APIToken");
-                    window.localStorage.removeItem("ChatGPTKey");
+                    window.localStorage.removeItem("SecretKey");
                 };
             } catch (error) {
 
