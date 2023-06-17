@@ -5,7 +5,6 @@
     <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <title>Excel Add-In with Commands Sample</title>
 
-
     <!-- Angular Material style sheet -->
     <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/angular_material/1.1.12/angular-material.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Material+Icons"
@@ -35,11 +34,12 @@
     <link rel="stylesheet" href="https://static2.sharepointonline.com/files/fabric/office-ui-fabric-core/9.6.0/css/fabric.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.2/rollups/aes.js" integrity="sha256-/H4YS+7aYb9kJ5OKhFYPUjSJdrtV6AeyJOtTkw6X72o=" crossorigin="anonymous"></script>
 
+
     <style>
         #searchInput {
             display: block;
             margin: 4px auto;
-            width: -webkit-fill-available;
+            width: 99%;
             height: 28px;
             border: 1px groove green;
         }
@@ -172,6 +172,14 @@
                 <md-button type="md-button" ng-click="SignIn()" ng-disabled="!UserName || !UserPassword" style="background-color:green;color:#fff;width:50%;">Login</md-button>
 
             </div>
+
+
+            <div style="position: fixed; bottom: 25px; width: 100%;">
+                <p style="text-align:center;">No account? <a style="color: green; text-decoration: none;" target="_blank" href="https://www.campaigntrackly.com">Register here</a></p>
+            </div>
+
+           <!-- No account? Register here: (link: https://www.campaigntrackly.com)-->
+
         </div>
 
         <!-- //////////////////////// Started Page only one time //////////////////////// -->
@@ -229,7 +237,7 @@
                 <md-button ng-click="ApplyTemplate()" ng-disabled="!SelectedOption || SelectedOption === 'Dummy'" style="background-color:#2E7D32;color:#ffffff;width:95%;">Apply Template</md-button>
             </div>
 
-
+           <!-- <md-button ng-click="OpenDialog()">Open Dialog</md-button>-->
 
 
         </div>

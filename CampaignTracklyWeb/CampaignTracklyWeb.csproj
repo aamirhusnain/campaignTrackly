@@ -566,6 +566,7 @@
     <Content Include="Scripts\Office\metadata\endpoints.xml" />
     <Content Include="Scripts\Office\metadata\features.xml" />
     <Content Include="Scripts\Office\MicrosoftAjax.js" />
+    <Content Include="Templates\SheetConfirm.html" />
     <Content Include="Web.config" />
   </ItemGroup>
   <ItemGroup>
