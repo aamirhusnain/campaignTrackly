@@ -120,7 +120,7 @@ app.controller('myCtrl', function ($scope, $mdToast, $log, $mdDialog, $element) 
 
                 $scope.OpenDialog = function () {
                     var DomainURL = window.location.origin;
-                    Office.context.ui.displayDialogAsync(DomainURL + '/Templates/SheetConfirm.html', { height: 31, width: 30 },
+                    Office.context.ui.displayDialogAsync(DomainURL + 'campaignTrackly/CampaignTracklyWeb/Templates/SheetConfirm.html', { height: 31, width: 30 },
                         function (asyncResult) {
                             dialog = asyncResult.value;
                             dialog.addEventHandler(Office.EventType.DialogMessageReceived, function (args) {
@@ -1099,7 +1099,7 @@ app.controller('myCtrl', function ($scope, $mdToast, $log, $mdDialog, $element) 
 
 
                                                                                 var DomainURL = window.location.origin;
-                                                                                Office.context.ui.displayDialogAsync(DomainURL + '/Templates/SheetConfirm.html', { height: 31, width: 30 },
+                                                                                Office.context.ui.displayDialogAsync(DomainURL + 'campaignTrackly/CampaignTracklyWeb/Templates/SheetConfirm.html', { height: 31, width: 30 },
                                                                                     function (asyncResult) {
                                                                                         var dialog = asyncResult.value;
                                                                                         dialog.addEventHandler(Office.EventType.DialogMessageReceived, function (args) {
@@ -1608,7 +1608,7 @@ app.controller('myCtrl', function ($scope, $mdToast, $log, $mdDialog, $element) 
                                                                             context.load(ResultSheet);
 
                                                                             var DomainURL = window.location.origin;
-                                                                            Office.context.ui.displayDialogAsync(DomainURL + '/Templates/SheetConfirm.html', { height: 31, width: 30 },
+                                                                            Office.context.ui.displayDialogAsync(DomainURL + 'campaignTrackly/CampaignTracklyWeb/Templates/SheetConfirm.html', { height: 31, width: 30 },
                                                                                 function (asyncResult) {
                                                                                     var dialog = asyncResult.value;
                                                                                     dialog.addEventHandler(Office.EventType.DialogMessageReceived, function (args) {
