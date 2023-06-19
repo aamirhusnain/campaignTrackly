@@ -102,81 +102,30 @@ app.controller('myCtrl', function ($scope, $mdToast, $log, $mdDialog, $element) 
 
             try {
 
-                function processMessage(args) {
 
-                    console.log(args);
-
-                    if (args.message === 'Replace') {
-                        console.log("Replace Button is clicked");
-                        dialog.close();
-                    };
-                    if (args.message === 'Merged') {
-                        console.log("Merged Button is clicked");
-                        dialog.close();
-                    };
+                $scope.OpenDialog = function (ev) {
+                 
                   
-                  //  Replace
+                    $mdDialog.show({
+                        scope: $scope.$new(),
+                        templateUrl: '/Templates/SheetConfirm.html',
+                        parent: angular.element(document.body),
+                        targetEvent: ev,
+                        clickOutsideToClose: false,
+                        escapeToClose: false,
+                        controller: ['$scope', '$mdDialog', function ($scope, $mdDialog) {
+
+
+                            
+
+
+                        }]
+                    });
+                  
                 };
 
-                $scope.OpenDialog = function () {
-                    var DomainURL = window.location.origin;
-                    Office.context.ui.displayDialogAsync(DomainURL + '/campaignTrackly/CampaignTracklyWeb/Templates/SheetConfirm.html', { height: 31, width: 30 },
-                        function (asyncResult) {
-                            dialog = asyncResult.value;
-                            dialog.addEventHandler(Office.EventType.DialogMessageReceived, function (args) {
+             
 
-                                console.log(args);
-
-                                if (args.message === 'Replace') {
-                                    console.log("Replace Button is clicked");
-                                    dialog.close();
-                                };
-                                if (args.message === 'Merged') {
-                                    console.log("Merged Button is clicked");
-                                    dialog.close();
-                                };
-                            });
-                        }
-                    );
-
-
-                    //Office.context.ui.displayDialogAsync(
-                    //    DomainURL + '/Templates/SheetConfirm.html',
-                    //    { width: 30, height: 30 },
-                    //    function (result) {
-                    //        if (result.status === Office.AsyncResultStatus.Succeeded) {
-                    //          //  dialog.addEventHandler(Office.EventType.DialogEventReceived, processMessage);
-                    //            dialog.addEventHandler(Microsoft.Office.WebExtension.EventType.DialogMessageReceived, processMessage);
-
-                    //        } else {
-                    //            // Error handling for failed dialog display
-                    //            console.log('Error: ' + result.error.message);
-                    //        }
-
-                    //    }
-                    //);
-
-
-                };
-
-
-
-
-
-                // Attach event listener to detect key presses
-                //document.addEventListener('keydown', function (event) {
-                //    // Handle key press event here
-                //    console.log('Key pressed:', event.key);
-                //});
-
-
-                // Press the enter key programmatically
-
-                $scope.testClick = function () {
-
-                    document.dispatchEvent(enterEvent);
-
-                };
 
                   /////////// Ask Question ///////////
 
@@ -366,12 +315,9 @@ app.controller('myCtrl', function ($scope, $mdToast, $log, $mdDialog, $element) 
                                         if (onlyWord.toLowerCase() != beforeWord.toLowerCase()) {
                                             showActionToast("Spelling might need to be corrected? Thank you", onlyWord, adressOfCell);
                                          } else {
-                                            // ProgressLinearInActive();
                                         };
                                     };
                                 } else {
-                                    //  ProgressLinearInActive();
-                                    //  console.log("Already Correct");
                                 };
 
 
@@ -807,6 +753,11 @@ app.controller('myCtrl', function ($scope, $mdToast, $log, $mdDialog, $element) 
                 }
 
 
+
+                function closeDialog() {
+                    $mdDialog.hide();
+                };
+
                 $scope.ApplyTemplate = async function () {
                     try {
                         ProgressLinearActive(); // Start the loader before making the API call
@@ -1095,212 +1046,138 @@ app.controller('myCtrl', function ($scope, $mdToast, $log, $mdDialog, $element) 
                                                                             if (checkRes === true) {
 
                                                                                 let ResultSheet = context.workbook.worksheets.getItem("Result_" + ActiveSheet);
+                                                                                ProgressLinearInActive();
+                                                                                $scope.OpenDialog();
+
+                                                                                $scope.SelectMet = function () {
+
+                                                                                    if (Scenario == "First Scenario") {
+
+                                                                                    var argsmessage = $scope.$$childTail.selectMethod;
 
 
+                                                                                    if (argsmessage === 'Replace') {
 
-                                                                                var DomainURL = window.location.origin;
-                                                                                Office.context.ui.displayDialogAsync(DomainURL + '/campaignTrackly/CampaignTracklyWeb/Templates/SheetConfirm.html', { height: 31, width: 30 },
-                                                                                    function (asyncResult) {
-                                                                                        var dialog = asyncResult.value;
-                                                                                        dialog.addEventHandler(Office.EventType.DialogMessageReceived, function (args) {
-                                                                                            //  console.log(args);
-                                                                                            if (args.message === 'Replace') {
+                                                                                        var UsdRangeRes = ResultSheet.getUsedRange();
+                                                                                        context.load(UsdRangeRes);
+                                                                                        UsdRangeRes.clear();
 
-                                                                                                var UsdRangeRes = ResultSheet.getUsedRange();
-                                                                                                context.load(UsdRangeRes);
-                                                                                                UsdRangeRes.clear();
+                                                                                        return context.sync().then(function () {
 
+                                                                                            Excel.run(function (context) {
+
+                                                                                                var ResultSheet = context.workbook.worksheets.getItem("Result_" + ActiveSheet);
                                                                                                 return context.sync().then(function () {
 
-                                                                                                    Excel.run(function (context) {
-
-                                                                                                        var ResultSheet = context.workbook.worksheets.getItem("Result_" + ActiveSheet);
-
-                                                                                                        return context.sync().then(function () {
-
-                                                                                                            var NextColumnForResult = nextLetter(lastColName);
-                                                                                                            var NextColumnForShort = nextLetter(NextColumnForResult);
-                                                                                                            var NextColumnForDate = nextLetter(NextColumnForShort);
-                                                                                                            var rangeForResHead = ResultSheet.getRange(NextColumnForResult + 1 + ":" + NextColumnForDate + 1);
-                                                                                                            rangeForResHead.values = [["Result", "Short Links", "Date"]];
-                                                                                                            var toRangeLink = UrlItem.length + 1;
-                                                                                                            var range_Link = NextColumnForResult + 2 + ":" + NextColumnForDate + toRangeLink;
-                                                                                                            var rangeForResLink = ResultSheet.getRange(range_Link);
+                                                                                                    var NextColumnForResult = nextLetter(lastColName);
+                                                                                                    var NextColumnForShort = nextLetter(NextColumnForResult);
+                                                                                                    var NextColumnForDate = nextLetter(NextColumnForShort);
+                                                                                                    var rangeForResHead = ResultSheet.getRange(NextColumnForResult + 1 + ":" + NextColumnForDate + 1);
+                                                                                                    rangeForResHead.values = [["Result", "Short Links", "Date"]];
+                                                                                                    var toRangeLink = UrlItem.length + 1;
+                                                                                                    var range_Link = NextColumnForResult + 2 + ":" + NextColumnForDate + toRangeLink;
+                                                                                                    var rangeForResLink = ResultSheet.getRange(range_Link);
 
 
-                                                                                                            let data = FinalSheetSet;
-                                                                                                            var FROM = 1;
-                                                                                                            var TO = FROM + data.length - 1;
-                                                                                                            var RANEG = "A" + FROM.toString() + ":" + Aplhabet + TO.toString();
-                                                                                                            let range = ResultSheet.getRange(RANEG);
-                                                                                                            range.formulas = data;
-                                                                                                            range.format.autofitColumns();
+                                                                                                    let data = FinalSheetSet;
+                                                                                                    var FROM = 1;
+                                                                                                    var TO = FROM + data.length - 1;
+                                                                                                    var RANEG = "A" + FROM.toString() + ":" + Aplhabet + TO.toString();
+                                                                                                    let range = ResultSheet.getRange(RANEG);
+                                                                                                    range.formulas = data;
+                                                                                                    range.format.autofitColumns();
 
-                                                                                                            var range_LinksRes = NextColumnForResult + 2 + ":" + NextColumnForResult + toRangeLink;
-                                                                                                            var rangeValOfLinks = ResultSheet.getRange(range_LinksRes);
+                                                                                                    var range_LinksRes = NextColumnForResult + 2 + ":" + NextColumnForResult + toRangeLink;
+                                                                                                    var rangeValOfLinks = ResultSheet.getRange(range_LinksRes);
 
-                                                                                                            rangeValOfLinks.format.wrapText = true;
-                                                                                                            rangeValOfLinks.format.columnWidth = 250;
+                                                                                                    rangeValOfLinks.format.wrapText = true;
+                                                                                                    rangeValOfLinks.format.columnWidth = 250;
 
-                                                                                                            ResultSheet.activate();
+                                                                                                    ResultSheet.activate();
 
-                                                                                                            return context.sync().then(function () {
-                                                                                                                rangeForResLink.values = UrlItem;
-                                                                                                                rangeForResLink.format.autofitColumns();
-                                                                                                                dialog.close();
-                                                                                                                ProgressLinearInActive();
-
-                                                                                                            });
-
-
-                                                                                                        });
-
-                                                                                                    });
-                                                                                                });
-
-
-
-                                                                                            };
-                                                                                            if (args.message === 'Merged') {
-
-
-
-
-                                                                                                Excel.run(function (context) {
-
-                                                                                                    var ResultSheet = context.workbook.worksheets.getItem("Result_" + ActiveSheet);
-                                                                                                    var usedRange = ResultSheet.getUsedRange();
-
-                                                                                                    // Execute the request
-                                                                                                    context.load(usedRange);
                                                                                                     return context.sync().then(function () {
-                                                                                                        // Access the used range properties
-                                                                                                        var rowCount = usedRange.rowCount;
-
-
-                                                                                                        var HeadNames = $scope.UsedSheetValues[0];
-                                                                                                        var markers = [];
-                                                                                                        var lastColName;
-                                                                                                        for (var n = 0; n < HeadNames.length; n++) {
-                                                                                                            var Aplhabet = (n + 10).toString(36).toUpperCase();
-                                                                                                            markers[i] = Actsheet.getRange(Aplhabet + 1);
-                                                                                                            markers[i].values = HeadNames[n];
-                                                                                                            if (n < HeadNames.length) {
-                                                                                                                if (HeadNames[n] != "Result" && HeadNames[n] != "Short Links" && HeadNames[n] != "Date") {
-                                                                                                                    lastColName = Aplhabet;
-                                                                                                                }
-                                                                                                            };
-                                                                                                        };
-
-
-
-                                                                                                        var NextColumnForResult = nextLetter(lastColName);
-                                                                                                        var NextColumnForShort = nextLetter(NextColumnForResult);
-                                                                                                        var NextColumnForDate = nextLetter(NextColumnForShort);
-
-                                                                                                        var fromRangeLink = rowCount + 1;
-                                                                                                        var toRangeLink = fromRangeLink + UrlItem.length - 1;
-                                                                                                        var range_Link = NextColumnForResult + fromRangeLink + ":" + NextColumnForDate + toRangeLink;
-                                                                                                        var rangeForResLink = ResultSheet.getRange(range_Link);
-
-                                                                                                        FinalSheetSet.shift();
-                                                                                                        let data = FinalSheetSet;
-                                                                                                        var FROM = rowCount + 1;
-                                                                                                        var TO = FROM + data.length - 1;
-                                                                                                        var RANEG = "A" + FROM.toString() + ":" + Aplhabet + TO.toString();
-                                                                                                        let range = ResultSheet.getRange(RANEG);
-                                                                                                        range.formulas = data;
-                                                                                                        range.format.autofitColumns();
-
-                                                                                                        var range_LinksRes = NextColumnForResult + fromRangeLink + ":" + NextColumnForResult + toRangeLink;
-                                                                                                        var rangeValOfLinks = ResultSheet.getRange(range_LinksRes);
-
-                                                                                                        rangeValOfLinks.format.wrapText = true;
-                                                                                                        rangeValOfLinks.format.columnWidth = 250;
-
-
-
-                                                                                                        //   let sheet = context.workbook.worksheets.getItem("Sheet1");
-                                                                                                        //   sheet.load("name, position");
-                                                                                                        ResultSheet.activate();
-
-                                                                                                        return context.sync().then(function () {
-                                                                                                            rangeForResLink.values = UrlItem;
-                                                                                                            rangeForResLink.format.autofitColumns();
-                                                                                                            dialog.close();
-                                                                                                            ProgressLinearInActive();;
-
-                                                                                                        });
-
-
-
-
-
+                                                                                                        rangeForResLink.values = UrlItem;
+                                                                                                        rangeForResLink.format.autofitColumns();
+                                                                                                        closeDialog();
+                                                                                                        ProgressLinearInActive();
 
                                                                                                     });
+
+
                                                                                                 });
 
-
-
-
-                                                                                            };
-
-
-
-
+                                                                                            });
                                                                                         });
-                                                                                    });
+                                                                                    };
+                                                                                    if (argsmessage === 'Merged') {
 
 
 
 
-                                                                                //var UsdRangeRes = ResultSheet.getUsedRange();
-                                                                                //UsdRangeRes.clear();
+                                                                                        Excel.run(function (context) {
 
-                                                                                //return context.sync().then(function () {
-                                                                                //    var NextColumnForResult = nextLetter(lastColName);
-                                                                                //    var NextColumnForShort = nextLetter(NextColumnForResult);
-                                                                                //    var NextColumnForDate = nextLetter(NextColumnForShort);
-                                                                                //    var rangeForResHead = ResultSheet.getRange(NextColumnForResult + 1 + ":" + NextColumnForDate + 1);
-                                                                                //    rangeForResHead.values = [["Result", "Short Links", "Date"]];
-                                                                                //    var toRangeLink = UrlItem.length + 1;
-                                                                                //    var range_Link = NextColumnForResult + 2 + ":" + NextColumnForDate + toRangeLink;
-                                                                                //    var rangeForResLink = ResultSheet.getRange(range_Link);
+                                                                                            var ResultSheet = context.workbook.worksheets.getItem("Result_" + ActiveSheet);
+                                                                                            var usedRange = ResultSheet.getUsedRange();
 
+                                                                                            // Execute the request
+                                                                                            context.load(usedRange);
+                                                                                            return context.sync().then(function () {
+                                                                                                var rowCount = usedRange.rowCount;
 
-                                                                                //    let data = FinalSheetSet;
-                                                                                //    var FROM = 1;
-                                                                                //    var TO = FROM + data.length - 1;
-                                                                                //    var RANEG = "A" + FROM.toString() + ":" + Aplhabet + TO.toString();
-                                                                                //    let range = ResultSheet.getRange(RANEG);
-                                                                                //    range.formulas = data;
-                                                                                //    range.format.autofitColumns();
-
-
-
-                                                                                //    var range_LinksRes = NextColumnForResult + 2 + ":" + NextColumnForResult + toRangeLink;
-                                                                                //    var rangeValOfLinks = ResultSheet.getRange(range_LinksRes);
-
-                                                                                //    rangeValOfLinks.format.wrapText = true;
-                                                                                //    rangeValOfLinks.format.columnWidth = 250;
+                                                                                                var HeadNames = $scope.UsedSheetValues[0];
+                                                                                                var markers = [];
+                                                                                                var lastColName;
+                                                                                                for (var n = 0; n < HeadNames.length; n++) {
+                                                                                                    var Aplhabet = (n + 10).toString(36).toUpperCase();
+                                                                                                    markers[i] = Actsheet.getRange(Aplhabet + 1);
+                                                                                                    markers[i].values = HeadNames[n];
+                                                                                                    if (n < HeadNames.length) {
+                                                                                                        if (HeadNames[n] != "Result" && HeadNames[n] != "Short Links" && HeadNames[n] != "Date") {
+                                                                                                            lastColName = Aplhabet;
+                                                                                                        }
+                                                                                                    };
+                                                                                                };
 
 
 
-                                                                                //    //   let sheet = context.workbook.worksheets.getItem("Sheet1");
-                                                                                //    //   sheet.load("name, position");
-                                                                                //    ResultSheet.activate();
+                                                                                                var NextColumnForResult = nextLetter(lastColName);
+                                                                                                var NextColumnForShort = nextLetter(NextColumnForResult);
+                                                                                                var NextColumnForDate = nextLetter(NextColumnForShort);
 
-                                                                                //    return context.sync().then(function () {
-                                                                                //        rangeForResLink.values = UrlItem;
-                                                                                //        rangeForResLink.format.autofitColumns();
-                                                                                //        ProgressLinearInActive();;
+                                                                                                var fromRangeLink = rowCount + 1;
+                                                                                                var toRangeLink = fromRangeLink + UrlItem.length - 1;
+                                                                                                var range_Link = NextColumnForResult + fromRangeLink + ":" + NextColumnForDate + toRangeLink;
+                                                                                                var rangeForResLink = ResultSheet.getRange(range_Link);
 
-                                                                                //    });
+                                                                                                FinalSheetSet.shift();
+                                                                                                let data = FinalSheetSet;
+                                                                                                var FROM = rowCount + 1;
+                                                                                                var TO = FROM + data.length - 1;
+                                                                                                var RANEG = "A" + FROM.toString() + ":" + Aplhabet + TO.toString();
+                                                                                                let range = ResultSheet.getRange(RANEG);
+                                                                                                range.formulas = data;
+                                                                                                range.format.autofitColumns();
 
+                                                                                                var range_LinksRes = NextColumnForResult + fromRangeLink + ":" + NextColumnForResult + toRangeLink;
+                                                                                                var rangeValOfLinks = ResultSheet.getRange(range_LinksRes);
 
-                                                                                //});
+                                                                                                rangeValOfLinks.format.wrapText = true;
+                                                                                                rangeValOfLinks.format.columnWidth = 250;
 
+                                                                                                ResultSheet.activate();
 
+                                                                                                return context.sync().then(function () {
+                                                                                                    rangeForResLink.values = UrlItem;
+                                                                                                    rangeForResLink.format.autofitColumns();
+                                                                                                    closeDialog();
+                                                                                                    ProgressLinearInActive();;
+
+                                                                                                });
+                                                                                            });
+                                                                                        });
+                                                                                        };
+                                                                                    };
+                                                                                };
                                                                             } else {
                                                                                 Excel.run(function (context) {
 
@@ -1606,161 +1483,152 @@ app.controller('myCtrl', function ($scope, $mdToast, $log, $mdDialog, $element) 
                                                                         if (checkRes === true) {
                                                                             var ResultSheet = context.workbook.worksheets.getItem("Result_" + ActiveSheet);
                                                                             context.load(ResultSheet);
+                                                                            ProgressLinearInActive();
+                                                                            $scope.OpenDialog();
 
-                                                                            var DomainURL = window.location.origin;
-                                                                            Office.context.ui.displayDialogAsync(DomainURL + '/campaignTrackly/CampaignTracklyWeb/Templates/SheetConfirm.html', { height: 31, width: 30 },
-                                                                                function (asyncResult) {
-                                                                                    var dialog = asyncResult.value;
-                                                                                    dialog.addEventHandler(Office.EventType.DialogMessageReceived, function (args) {
-                                                                                      //  console.log(args);
-                                                                                        if (args.message === 'Replace') {
-                                                                                          //  console.log("Replace Button is clicked");
-                                                                                            var UsdRangeRes = ResultSheet.getUsedRange();
-                                                                                            context.load(UsdRangeRes);
-                                                                                            UsdRangeRes.clear();
+                                                                            $scope.SelectMet = function () {
+                                                                                if (Scenario === "Secound Scenario") {
+                                                                                var argsmessage = $scope.$$childTail.selectMethod;
+
+                                                                                if (argsmessage === 'Replace') {
+                                                                                    //  console.log("Replace Button is clicked");
+                                                                                    var UsdRangeRes = ResultSheet.getUsedRange();
+                                                                                    context.load(UsdRangeRes);
+                                                                                    UsdRangeRes.clear();
+
+                                                                                    return context.sync().then(function () {
+
+                                                                                        Excel.run(function (context) {
+
+                                                                                            var ResultSheet = context.workbook.worksheets.getItem("Result_" + ActiveSheet);
+
+                                                                                            var HeadNames = $scope.UsedSheetValues[0];
+                                                                                            var markers = [];
+                                                                                            var lastColName;
+                                                                                            for (var n = 0; n < HeadNames.length; n++) {
+                                                                                                var Aplhabet = (n + 10).toString(36).toUpperCase();
+                                                                                                markers[i] = Actsheet.getRange(Aplhabet + 1);
+                                                                                                markers[i].values = HeadNames[n];
+                                                                                                if (n < HeadNames.length) {
+                                                                                                    if (HeadNames[n] != "Result" && HeadNames[n] != "Short Links" && HeadNames[n] != "Date") {
+                                                                                                        lastColName = Aplhabet;
+                                                                                                    }
+                                                                                                };
+                                                                                            };
+
+                                                                                            var NextColumnForResult = nextLetter(lastColName);
+                                                                                            var NextColumnForShort = nextLetter(NextColumnForResult);
+                                                                                            var NextColumnForDate = nextLetter(NextColumnForShort);
+                                                                                            var rangeForResHead = ResultSheet.getRange(NextColumnForResult + 1 + ":" + NextColumnForDate + 1);
+                                                                                            rangeForResHead.values = [["Result", "Short Links", "Date"]];
+                                                                                            var toRangeLink = UrlItem.length + 1;
+                                                                                            var range_Link = NextColumnForResult + 2 + ":" + NextColumnForDate + toRangeLink;
+                                                                                            var rangeForResLink = ResultSheet.getRange(range_Link);
+
+                                                                                            let data = FinalSheetSet;
+                                                                                            var FROM = 1;
+                                                                                            var TO = FROM + data.length - 1;
+                                                                                            var RANEG = "A" + FROM.toString() + ":" + Aplhabet + TO.toString();
+                                                                                            let range = ResultSheet.getRange(RANEG);
+                                                                                            range.formulas = data;
+                                                                                            range.format.autofitColumns();
+
+                                                                                            var range_LinksRes = NextColumnForResult + 2 + ":" + NextColumnForResult + toRangeLink;
+                                                                                            var rangeValOfLinks = ResultSheet.getRange(range_LinksRes);
+
+                                                                                            rangeValOfLinks.format.wrapText = true;
+                                                                                            rangeValOfLinks.format.columnWidth = 250;
+
+                                                                                            ResultSheet.activate();
+
+                                                                                            return context.sync().then(function () {
+                                                                                                rangeForResLink.values = UrlItem;
+                                                                                                rangeForResLink.format.autofitColumns();
+                                                                                                closeDialog();
+                                                                                                ProgressLinearInActive();
+                                                                                            });
+                                                                                        });
+                                                                                    });
+                                                                                }
+                                                                                if (argsmessage === 'Merged') {
+                                                                                    //    console.log("Merged Button is clicked");
+
+                                                                                    Excel.run(function (context) {
+
+                                                                                        var ResultSheet = context.workbook.worksheets.getItem("Result_" + ActiveSheet);
+                                                                                        var usedRange = ResultSheet.getUsedRange();
+
+                                                                                        // Execute the request
+                                                                                        context.load(usedRange);
+                                                                                        return context.sync().then(function () {
+                                                                                            // Access the used range properties
+                                                                                            var rowCount = usedRange.rowCount;
+                                                                                            // var columnCount = usedRange.columnCount;
+
+                                                                                            var HeadNames = $scope.UsedSheetValues[0];
+                                                                                            var markers = [];
+                                                                                            var lastColName;
+                                                                                            for (var n = 0; n < HeadNames.length; n++) {
+                                                                                                var Aplhabet = (n + 10).toString(36).toUpperCase();
+                                                                                                markers[i] = Actsheet.getRange(Aplhabet + 1);
+                                                                                                markers[i].values = HeadNames[n];
+                                                                                                if (n < HeadNames.length) {
+                                                                                                    if (HeadNames[n] != "Result" && HeadNames[n] != "Short Links" && HeadNames[n] != "Date") {
+                                                                                                        lastColName = Aplhabet;
+                                                                                                    }
+                                                                                                };
+                                                                                            };
+
+                                                                                            var NextColumnForResult = nextLetter(lastColName);
+                                                                                            var NextColumnForShort = nextLetter(NextColumnForResult);
+                                                                                            var NextColumnForDate = nextLetter(NextColumnForShort);
+                                                                                            //var rangeForResHead = ResultSheet.getRange(NextColumnForResult + 1 + ":" + NextColumnForDate + 1);
+                                                                                            //rangeForResHead.values = [["Result", "Short Links", "Date"]];
+
+                                                                                            var fromRangeLink = rowCount + 1;
+                                                                                            var toRangeLink = fromRangeLink + UrlItem.length - 1;
+
+                                                                                            var range_Link = NextColumnForResult + fromRangeLink + ":" + NextColumnForDate + toRangeLink;
+                                                                                            var rangeForResLink = ResultSheet.getRange(range_Link);
+
+
+                                                                                            FinalSheetSet.shift();
+
+                                                                                            let data = FinalSheetSet;
+                                                                                            var FROM = rowCount + 1;
+                                                                                            var TO = FROM + data.length - 1;
+                                                                                            var RANEG = "A" + FROM.toString() + ":" + Aplhabet + TO.toString();
+                                                                                            let range = ResultSheet.getRange(RANEG);
+                                                                                            range.formulas = data;
+                                                                                            range.format.autofitColumns();
+
+                                                                                            var range_LinksRes = NextColumnForResult + fromRangeLink + ":" + NextColumnForResult + toRangeLink;
+                                                                                            var rangeValOfLinks = ResultSheet.getRange(range_LinksRes);
+
+                                                                                            rangeValOfLinks.format.wrapText = true;
+                                                                                            rangeValOfLinks.format.columnWidth = 250;
+
+                                                                                            ResultSheet.activate();
+
+
 
                                                                                             return context.sync().then(function () {
 
-                                                                                                Excel.run(function (context) {
+                                                                                                rangeForResLink.values = UrlItem;
+                                                                                                rangeForResLink.format.autofitColumns();
+                                                                                                closeDialog();
+                                                                                                ProgressLinearInActive();
 
-                                                                                                    var ResultSheet = context.workbook.worksheets.getItem("Result_" + ActiveSheet);
-                                                                                              
-                                                                                                    var HeadNames = $scope.UsedSheetValues[0];
-                                                                                                    var markers = [];
-                                                                                                    var lastColName;
-                                                                                                    for (var n = 0; n < HeadNames.length; n++) {
-                                                                                                        var Aplhabet = (n + 10).toString(36).toUpperCase();
-                                                                                                        markers[i] = Actsheet.getRange(Aplhabet + 1);
-                                                                                                        markers[i].values = HeadNames[n];
-                                                                                                        if (n < HeadNames.length) {
-                                                                                                            if (HeadNames[n] != "Result" && HeadNames[n] != "Short Links" && HeadNames[n] != "Date") {
-                                                                                                                lastColName = Aplhabet;
-                                                                                                            }
-                                                                                                        };
-                                                                                                    };
-
-                                                                                                    var NextColumnForResult = nextLetter(lastColName);
-                                                                                                    var NextColumnForShort = nextLetter(NextColumnForResult);
-                                                                                                    var NextColumnForDate = nextLetter(NextColumnForShort);
-                                                                                                    var rangeForResHead = ResultSheet.getRange(NextColumnForResult + 1 + ":" + NextColumnForDate + 1);
-                                                                                                    rangeForResHead.values = [["Result", "Short Links", "Date"]];
-                                                                                                    var toRangeLink = UrlItem.length + 1;
-                                                                                                    var range_Link = NextColumnForResult + 2 + ":" + NextColumnForDate + toRangeLink;
-                                                                                                    var rangeForResLink = ResultSheet.getRange(range_Link);
-
-                                                                                                    let data = FinalSheetSet;
-                                                                                                    var FROM = 1;
-                                                                                                    var TO = FROM + data.length - 1;
-                                                                                                    var RANEG = "A" + FROM.toString() + ":" + Aplhabet + TO.toString();
-                                                                                                    let range = ResultSheet.getRange(RANEG);
-                                                                                                    range.formulas = data;
-                                                                                                    range.format.autofitColumns();
-
-                                                                                                    var range_LinksRes = NextColumnForResult + 2 + ":" + NextColumnForResult + toRangeLink;
-                                                                                                    var rangeValOfLinks = ResultSheet.getRange(range_LinksRes);
-
-                                                                                                    rangeValOfLinks.format.wrapText = true;
-                                                                                                    rangeValOfLinks.format.columnWidth = 250;
-
-                                                                                                    ResultSheet.activate();
-
-                                                                                                    return context.sync().then(function () {
-                                                                                                        rangeForResLink.values = UrlItem;
-                                                                                                        rangeForResLink.format.autofitColumns();
-                                                                                                        dialog.close();
-                                                                                                        // AllSheetAutoFill();
-                                                                                                        ProgressLinearInActive();
-                                                                                                    });
-                                                                                                });
-                                                                                            });
-                                                                                        }
-                                                                                        if (args.message === 'Merged') {
-                                                                                        //    console.log("Merged Button is clicked");
-
-                                                                                            Excel.run(function (context) {
-
-                                                                                                var ResultSheet = context.workbook.worksheets.getItem("Result_" + ActiveSheet);
-                                                                                                var usedRange = ResultSheet.getUsedRange();
-
-                                                                                                // Execute the request
-                                                                                                context.load(usedRange);
-                                                                                                return context.sync().then(function () {
-                                                                                                    // Access the used range properties
-                                                                                                    var rowCount = usedRange.rowCount;
-                                                                                                   // var columnCount = usedRange.columnCount;
-
-                                                                                                    var HeadNames = $scope.UsedSheetValues[0];
-                                                                                                    var markers = [];
-                                                                                                    var lastColName;
-                                                                                                    for (var n = 0; n < HeadNames.length; n++) {
-                                                                                                        var Aplhabet = (n + 10).toString(36).toUpperCase();
-                                                                                                        markers[i] = Actsheet.getRange(Aplhabet + 1);
-                                                                                                        markers[i].values = HeadNames[n];
-                                                                                                        if (n < HeadNames.length) {
-                                                                                                            if (HeadNames[n] != "Result" && HeadNames[n] != "Short Links" && HeadNames[n] != "Date") {
-                                                                                                                lastColName = Aplhabet;
-                                                                                                            }
-                                                                                                        };
-                                                                                                    };
-
-                                                                                                    var NextColumnForResult = nextLetter(lastColName);
-                                                                                                    var NextColumnForShort = nextLetter(NextColumnForResult);
-                                                                                                    var NextColumnForDate = nextLetter(NextColumnForShort);
-                                                                                                    //var rangeForResHead = ResultSheet.getRange(NextColumnForResult + 1 + ":" + NextColumnForDate + 1);
-                                                                                                    //rangeForResHead.values = [["Result", "Short Links", "Date"]];
-                                                                                       
-                                                                                                    var fromRangeLink = rowCount + 1;
-                                                                                                    var toRangeLink = fromRangeLink + UrlItem.length - 1;
-                                                                                                
-                                                                                                    var range_Link = NextColumnForResult + fromRangeLink + ":" + NextColumnForDate + toRangeLink;
-                                                                                                    var rangeForResLink = ResultSheet.getRange(range_Link);
-
-
-                                                                                                    FinalSheetSet.shift();
-
-                                                                                                    let data = FinalSheetSet;
-                                                                                                    var FROM = rowCount + 1;
-                                                                                                    var TO = FROM + data.length - 1;
-                                                                                                    var RANEG = "A" + FROM.toString() + ":" + Aplhabet + TO.toString();
-                                                                                                    let range = ResultSheet.getRange(RANEG);
-                                                                                                    range.formulas = data;
-                                                                                                    range.format.autofitColumns();
-
-                                                                                                    var range_LinksRes = NextColumnForResult + fromRangeLink + ":" + NextColumnForResult + toRangeLink;
-                                                                                                    var rangeValOfLinks = ResultSheet.getRange(range_LinksRes);
-
-                                                                                                    rangeValOfLinks.format.wrapText = true;
-                                                                                                    rangeValOfLinks.format.columnWidth = 250;
-
-                                                                                                    ResultSheet.activate();
-
-
-
-                                                                                                    return context.sync().then(function () {
-
-                                                                                                        rangeForResLink.values = UrlItem;
-                                                                                                        rangeForResLink.format.autofitColumns();
-                                                                                                      dialog.close();
-                                                                                                        ProgressLinearInActive();
-
-
-                                                                                                    });
-
-                                                                                                    //console.log("Used Range Address: " + address);
-                                                                                                    //console.log("Number of Rows: " + rowCount);
-                                                                                                    //console.log("Number of Columns: " + columnCount);
-
-                                                                                                });
 
                                                                                             });
 
-                                                                                           // dialog.close();
-                                                                                        }
+                                                                                        });
+
                                                                                     });
-                                                                                }
-                                                                            );
-                                                                        
+                                                                                    };
+                                                                                };
 
+                                                                            };
 
                                                                         } else {
 

@@ -68,8 +68,12 @@
             100% {
                 transform: rotate(360deg);
             }
-        } 
+        }
 
+        .customAnchor {
+            color: green;
+            text-decoration: none;
+        }
 
     </style>
 
@@ -167,15 +171,16 @@
                 </md-input-container>
 
             </div>
-
-            <div style="margin-top:-25px;text-align:center;padding:5px;">
+            <div style="text-align: right; margin-top: -30px;">
+                <a href="https://app.campaigntrackly.com/reset-password/" target="_blank" class="customAnchor">Forgot password?</a>
+            </div>
+            <div style="text-align:center;padding:5px;">
                 <md-button type="md-button" ng-click="SignIn()" ng-disabled="!UserName || !UserPassword" style="background-color:green;color:#fff;width:50%;">Login</md-button>
 
             </div>
 
-
             <div style="position: fixed; bottom: 25px; width: 100%;">
-                <p style="text-align:center;">No account? <a style="color: green; text-decoration: none;" target="_blank" href="https://www.campaigntrackly.com">Register here</a></p>
+                <p style="text-align:center;">No account? <a class="customAnchor" target="_blank" href="https://www.campaigntrackly.com">Register here</a></p>
             </div>
 
            <!-- No account? Register here: (link: https://www.campaigntrackly.com)-->
