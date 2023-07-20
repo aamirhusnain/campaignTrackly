@@ -38,10 +38,10 @@ app.controller('myCtrl', function ($scope, $mdToast, $log, $mdDialog, $element) 
         function decryptAPIKey(encryptedKey, encryptionKey) {
             const decrypted = CryptoJS.AES.decrypt(encryptedKey, encryptionKey);
             return decrypted.toString(CryptoJS.enc.Utf8);
-        }
+        };
 
          var BaseURL = "https://devapp.campaigntrackly.com";
-       //    var BaseURL = "https://app.campaigntrackly.com";
+      //     var BaseURL = "https://app.campaigntrackly.com";
 
         /////////// show the started screen to user ///////////
         var checkUser = window.localStorage.getItem("UserVisted");
@@ -76,6 +76,41 @@ app.controller('myCtrl', function ($scope, $mdToast, $log, $mdDialog, $element) 
             };
         };
 
+
+
+        $scope.downloadImage = async function (url, fileName) {
+            ProgressLinearActive();
+            // Create a fetch request for the image.
+            const request = new Request(url);
+
+            // Make the request and get the response.
+            const response = await fetch(request);
+
+            // Check if the response is successful.
+            if (response.ok) {
+                // Create a Blob object from the response.
+                const blob = await response.blob();
+
+                // Create a URL for the Blob object.
+                const blobUrl = window.URL.createObjectURL(blob);
+
+                // Create an anchor element and set its href to the Blob URL.
+                const anchor = document.createElement('a');
+                anchor.href = blobUrl;
+                anchor.download = fileName;
+
+                // Click the anchor element to download the image.
+                anchor.click();
+                ProgressLinearInActive();
+            }
+        }
+
+
+
+
+
+
+
         function endGptLoader() {
             document.getElementById("loaderGpt").style.display = 'none';
             $scope.tooltipText = "Ask Chat GPT";
@@ -108,15 +143,14 @@ app.controller('myCtrl', function ($scope, $mdToast, $log, $mdDialog, $element) 
                   
                     $mdDialog.show({
                         scope: $scope.$new(),
-                        templateUrl: '/campaignTrackly/CampaignTracklyWeb/Templates/SheetConfirm.html',
+                        templateUrl: '/Templates/SheetConfirm.html',
+                      //  templateUrl: '/campaignTrackly/CampaignTracklyWeb/Templates/SheetConfirm.html',
                         parent: angular.element(document.body),
                         targetEvent: ev,
                         clickOutsideToClose: false,
                         escapeToClose: false,
                         controller: ['$scope', '$mdDialog', function ($scope, $mdDialog) {
 
-
-                            
 
 
                         }]
@@ -354,9 +388,6 @@ app.controller('myCtrl', function ($scope, $mdToast, $log, $mdDialog, $element) 
 
                     if (rowNumber === "1" && eventArgs.details.valueAfter != '') {
                         // ProgressLinearActive();
-
-                      //  console.log(eventArgs.details.valueAfter);
-                      //  console.log(eventArgs);
 
                         var wordForCheckSpell = eventArgs.details.valueAfter;
 
@@ -650,12 +681,6 @@ app.controller('myCtrl', function ($scope, $mdToast, $log, $mdDialog, $element) 
                     });
 
                 };
-
-
-                //document.getElementById("selectMenu").addEventListener("click", function () {
-                //    var myinput = document.getElementById("searchInput");
-                //    myinput.focus();
-                //});
 
                 function alphaOnly(a) {
                     var b = '';
@@ -993,7 +1018,7 @@ app.controller('myCtrl', function ($scope, $mdToast, $log, $mdDialog, $element) 
                                                                     for (var m = 0; m < $scope.result_Links.length; m++) {
                                                                         if ($scope.result_Links[m].links.length > 0) {
                                                                             for (var n = 0; n < $scope.result_Links[m].links.length; n++) {
-                                                                                UrlItem.push([$scope.result_Links[m].links[n], $scope.result_Links[m].short_links[n], $scope.result_Links[m].date])
+                                                                                UrlItem.push([$scope.result_Links[m].links[n], $scope.result_Links[m].short_links[n], $scope.result_Links[m].date, $scope.result_Links[m].short_links[n] + "/qr"])
                                                                             };
                                                                         } else {
                                                                             UrlItem.push(['', '', $scope.result_Links[m].date]);
@@ -1009,7 +1034,7 @@ app.controller('myCtrl', function ($scope, $mdToast, $log, $mdDialog, $element) 
                                                                         markers[i] = sheet.getRange(Aplhabet + 1);
                                                                         markers[i].values = HeadNames[n];
                                                                         if (n < HeadNames.length) {
-                                                                            if (HeadNames[n] != "Result" && HeadNames[n] != "Short Links" && HeadNames[n] != "Date") {
+                                                                            if (HeadNames[n] != "Result" && HeadNames[n] != "Short Links" && HeadNames[n] != "Date" && HeadNames[n] != "QR Code") {
                                                                                 lastColName = Aplhabet;
                                                                             };
                                                                         };
@@ -1072,10 +1097,16 @@ app.controller('myCtrl', function ($scope, $mdToast, $log, $mdDialog, $element) 
                                                                                                     var NextColumnForResult = nextLetter(lastColName);
                                                                                                     var NextColumnForShort = nextLetter(NextColumnForResult);
                                                                                                     var NextColumnForDate = nextLetter(NextColumnForShort);
-                                                                                                    var rangeForResHead = ResultSheet.getRange(NextColumnForResult + 1 + ":" + NextColumnForDate + 1);
-                                                                                                    rangeForResHead.values = [["Result", "Short Links", "Date"]];
+                                                                                                    var NextColumnForQr = nextLetter(NextColumnForDate);
+                                                                                                    var rangeForResHead = ResultSheet.getRange(NextColumnForResult + 1 + ":" + NextColumnForQr + 1);
+                                                                                                    rangeForResHead.values = [["Result", "Short Links", "Date", "QR Code"]];
+
+                                                                                                    var rangeForDate = sheet.getRange(NextColumnForDate + ":" + NextColumnForDate); // Replace "A:A" with your desired column range
+                                                                                                    rangeForDate.numberFormat = [["[$-409]m/d/yy h:mm AM/PM;@"]];
+
+
                                                                                                     var toRangeLink = UrlItem.length + 1;
-                                                                                                    var range_Link = NextColumnForResult + 2 + ":" + NextColumnForDate + toRangeLink;
+                                                                                                    var range_Link = NextColumnForResult + 2 + ":" + NextColumnForQr + toRangeLink;
                                                                                                     var rangeForResLink = ResultSheet.getRange(range_Link);
 
 
@@ -1112,8 +1143,6 @@ app.controller('myCtrl', function ($scope, $mdToast, $log, $mdDialog, $element) 
                                                                                     if (argsmessage === 'Merged') {
 
 
-
-
                                                                                         Excel.run(function (context) {
 
                                                                                             var ResultSheet = context.workbook.worksheets.getItem("Result_" + ActiveSheet);
@@ -1132,7 +1161,7 @@ app.controller('myCtrl', function ($scope, $mdToast, $log, $mdDialog, $element) 
                                                                                                     markers[i] = Actsheet.getRange(Aplhabet + 1);
                                                                                                     markers[i].values = HeadNames[n];
                                                                                                     if (n < HeadNames.length) {
-                                                                                                        if (HeadNames[n] != "Result" && HeadNames[n] != "Short Links" && HeadNames[n] != "Date") {
+                                                                                                        if (HeadNames[n] != "Result" && HeadNames[n] != "Short Links" && HeadNames[n] != "Date" && HeadNames[n] != "QR Code") {
                                                                                                             lastColName = Aplhabet;
                                                                                                         }
                                                                                                     };
@@ -1143,11 +1172,17 @@ app.controller('myCtrl', function ($scope, $mdToast, $log, $mdDialog, $element) 
                                                                                                 var NextColumnForResult = nextLetter(lastColName);
                                                                                                 var NextColumnForShort = nextLetter(NextColumnForResult);
                                                                                                 var NextColumnForDate = nextLetter(NextColumnForShort);
+                                                                                                var NextColumnForQr = nextLetter(NextColumnForDate);
 
                                                                                                 var fromRangeLink = rowCount + 1;
                                                                                                 var toRangeLink = fromRangeLink + UrlItem.length - 1;
-                                                                                                var range_Link = NextColumnForResult + fromRangeLink + ":" + NextColumnForDate + toRangeLink;
+                                                                                                var range_Link = NextColumnForResult + fromRangeLink + ":" + NextColumnForQr + toRangeLink;
                                                                                                 var rangeForResLink = ResultSheet.getRange(range_Link);
+
+                                                                                                var rangeForDate = sheet.getRange(NextColumnForDate + ":" + NextColumnForDate); // Replace "A:A" with your desired column range
+                                                                                                rangeForDate.numberFormat = [["[$-409]m/d/yy h:mm AM/PM;@"]];
+
+
 
                                                                                                 FinalSheetSet.shift();
                                                                                                 let data = FinalSheetSet;
@@ -1195,10 +1230,17 @@ app.controller('myCtrl', function ($scope, $mdToast, $log, $mdDialog, $element) 
                                                                                         var NextColumnForResult = nextLetter(lastColName);
                                                                                         var NextColumnForShort = nextLetter(NextColumnForResult);
                                                                                         var NextColumnForDate = nextLetter(NextColumnForShort);
-                                                                                        var rangeForResHead = ResultSheet.getRange(NextColumnForResult + 1 + ":" + NextColumnForDate + 1);
-                                                                                        rangeForResHead.values = [["Result", "Short Links", "Date"]];
+                                                                                        var NextColumnForQr = nextLetter(NextColumnForDate);
+                                                                                        var rangeForResHead = ResultSheet.getRange(NextColumnForResult + 1 + ":" + NextColumnForQr + 1);
+                                                                                        rangeForResHead.values = [["Result", "Short Links", "Date", "QR Code"]];
+
+                                                                                        var rangeForDate = sheet.getRange(NextColumnForDate + ":" + NextColumnForDate); // Replace "A:A" with your desired column range
+                                                                                        rangeForDate.numberFormat = [["[$-409]m/d/yy h:mm AM/PM;@"]];
+
+
+
                                                                                         var toRangeLink = UrlItem.length + 1;
-                                                                                        var range_Link = NextColumnForResult + 2 + ":" + NextColumnForDate + toRangeLink;
+                                                                                        var range_Link = NextColumnForResult + 2 + ":" + NextColumnForQr + toRangeLink;
                                                                                         var rangeForResLink = ResultSheet.getRange(range_Link);
 
 
@@ -1446,7 +1488,7 @@ app.controller('myCtrl', function ($scope, $mdToast, $log, $mdDialog, $element) 
                                                                 for (var m = 0; m < $scope.result_Links.length; m++) {
                                                                     if ($scope.result_Links[m].links.length > 0) {
                                                                         for (var n = 0; n < $scope.result_Links[m].links.length; n++) {
-                                                                            UrlItem.push([$scope.result_Links[m].links[n], $scope.result_Links[m].short_links[n], $scope.result_Links[m].date])
+                                                                            UrlItem.push([$scope.result_Links[m].links[n], $scope.result_Links[m].short_links[n], $scope.result_Links[m].date, $scope.result_Links[m].short_links[n] + "/qr"])
                                                                         };
                                                                     } else {
                                                                         UrlItem.push(['', '', $scope.result_Links[m].date]);
@@ -1510,7 +1552,7 @@ app.controller('myCtrl', function ($scope, $mdToast, $log, $mdDialog, $element) 
                                                                                                 markers[i] = Actsheet.getRange(Aplhabet + 1);
                                                                                                 markers[i].values = HeadNames[n];
                                                                                                 if (n < HeadNames.length) {
-                                                                                                    if (HeadNames[n] != "Result" && HeadNames[n] != "Short Links" && HeadNames[n] != "Date") {
+                                                                                                    if (HeadNames[n] != "Result" && HeadNames[n] != "Short Links" && HeadNames[n] != "Date" && HeadNames[n] != "QR Code") {
                                                                                                         lastColName = Aplhabet;
                                                                                                     }
                                                                                                 };
@@ -1519,10 +1561,15 @@ app.controller('myCtrl', function ($scope, $mdToast, $log, $mdDialog, $element) 
                                                                                             var NextColumnForResult = nextLetter(lastColName);
                                                                                             var NextColumnForShort = nextLetter(NextColumnForResult);
                                                                                             var NextColumnForDate = nextLetter(NextColumnForShort);
-                                                                                            var rangeForResHead = ResultSheet.getRange(NextColumnForResult + 1 + ":" + NextColumnForDate + 1);
-                                                                                            rangeForResHead.values = [["Result", "Short Links", "Date"]];
+                                                                                            var NextColumnForQr = nextLetter(NextColumnForDate);
+                                                                                            var rangeForResHead = ResultSheet.getRange(NextColumnForResult + 1 + ":" + NextColumnForQr + 1);
+
+                                                                                            var rangeForDate = sheet.getRange(NextColumnForDate + ":" + NextColumnForDate); // Replace "A:A" with your desired column range
+                                                                                            rangeForDate.numberFormat = [["[$-409]m/d/yy h:mm AM/PM;@"]];
+
+                                                                                            rangeForResHead.values = [["Result", "Short Links", "Date", "QR Code"]];
                                                                                             var toRangeLink = UrlItem.length + 1;
-                                                                                            var range_Link = NextColumnForResult + 2 + ":" + NextColumnForDate + toRangeLink;
+                                                                                            var range_Link = NextColumnForResult + 2 + ":" + NextColumnForQr + toRangeLink;
                                                                                             var rangeForResLink = ResultSheet.getRange(range_Link);
 
                                                                                             let data = FinalSheetSet;
@@ -1573,7 +1620,7 @@ app.controller('myCtrl', function ($scope, $mdToast, $log, $mdDialog, $element) 
                                                                                                 markers[i] = Actsheet.getRange(Aplhabet + 1);
                                                                                                 markers[i].values = HeadNames[n];
                                                                                                 if (n < HeadNames.length) {
-                                                                                                    if (HeadNames[n] != "Result" && HeadNames[n] != "Short Links" && HeadNames[n] != "Date") {
+                                                                                                    if (HeadNames[n] != "Result" && HeadNames[n] != "Short Links" && HeadNames[n] != "Date" && HeadNames[n] != "QR Code") {
                                                                                                         lastColName = Aplhabet;
                                                                                                     }
                                                                                                 };
@@ -1582,15 +1629,19 @@ app.controller('myCtrl', function ($scope, $mdToast, $log, $mdDialog, $element) 
                                                                                             var NextColumnForResult = nextLetter(lastColName);
                                                                                             var NextColumnForShort = nextLetter(NextColumnForResult);
                                                                                             var NextColumnForDate = nextLetter(NextColumnForShort);
+                                                                                            var NextColumnForQr = nextLetter(NextColumnForDate);
                                                                                             //var rangeForResHead = ResultSheet.getRange(NextColumnForResult + 1 + ":" + NextColumnForDate + 1);
                                                                                             //rangeForResHead.values = [["Result", "Short Links", "Date"]];
+
 
                                                                                             var fromRangeLink = rowCount + 1;
                                                                                             var toRangeLink = fromRangeLink + UrlItem.length - 1;
 
-                                                                                            var range_Link = NextColumnForResult + fromRangeLink + ":" + NextColumnForDate + toRangeLink;
+                                                                                            var range_Link = NextColumnForResult + fromRangeLink + ":" + NextColumnForQr + toRangeLink;
                                                                                             var rangeForResLink = ResultSheet.getRange(range_Link);
 
+                                                                                            var rangeForDate = sheet.getRange(NextColumnForDate + ":" + NextColumnForDate); // Replace "A:A" with your desired column range
+                                                                                            rangeForDate.numberFormat = [["[$-409]m/d/yy h:mm AM/PM;@"]];
 
                                                                                             FinalSheetSet.shift();
 
@@ -1654,7 +1705,7 @@ app.controller('myCtrl', function ($scope, $mdToast, $log, $mdDialog, $element) 
                                                                                         markers[i] = sheet.getRange(Aplhabet + 1);
                                                                                         markers[i].values = HeadNames[n];
                                                                                         if (n < HeadNames.length) {
-                                                                                            if (HeadNames[n] != "Result" && HeadNames[n] != "Short Links" && HeadNames[n] != "Date") {
+                                                                                            if (HeadNames[n] != "Result" && HeadNames[n] != "Short Links" && HeadNames[n] != "Date" && HeadNames[n] != "QR Code") {
                                                                                                 lastColName = Aplhabet;
                                                                                             };
                                                                                         };
@@ -1665,10 +1716,18 @@ app.controller('myCtrl', function ($scope, $mdToast, $log, $mdDialog, $element) 
                                                                                     var NextColumnForResult = nextLetter(lastColName);
                                                                                     var NextColumnForShort = nextLetter(NextColumnForResult);
                                                                                     var NextColumnForDate = nextLetter(NextColumnForShort);
-                                                                                    var rangeForResHead = ResultSheet.getRange(NextColumnForResult + 1 + ":" + NextColumnForDate + 1);
-                                                                                    rangeForResHead.values = [["Result", "Short Links", "Date"]];
+                                                                                    var NextColumnForQr = nextLetter(NextColumnForDate);
+                                                                                    var rangeForResHead = ResultSheet.getRange(NextColumnForResult + 1 + ":" + NextColumnForQr + 1);
+
+                                                                                    var rangeForDate = sheet.getRange(NextColumnForDate + ":" + NextColumnForDate); // Replace "A:A" with your desired column range
+                                                                              //    rangeForDate.numberFormat = "dd/mm/yyyy";
+                                                                                    rangeForDate.numberFormat = [["[$-409]m/d/yy h:mm AM/PM;@"]];
+
+
+
+                                                                                    rangeForResHead.values = [["Result", "Short Links", "Date", "QR Code"]];
                                                                                     var toRangeLink = UrlItem.length + 1;
-                                                                                    var range_Link = NextColumnForResult + 2 + ":" + NextColumnForDate + toRangeLink;
+                                                                                    var range_Link = NextColumnForResult + 2 + ":" + NextColumnForQr + toRangeLink;
                                                                                     var rangeForResLink = ResultSheet.getRange(range_Link);
 
 
