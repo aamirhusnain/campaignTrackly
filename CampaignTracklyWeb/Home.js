@@ -143,8 +143,8 @@ app.controller('myCtrl', function ($scope, $mdToast, $log, $mdDialog, $element) 
                   
                     $mdDialog.show({
                         scope: $scope.$new(),
-                        templateUrl: '/Templates/SheetConfirm.html',
-                      //  templateUrl: '/campaignTrackly/CampaignTracklyWeb/Templates/SheetConfirm.html',
+                       // templateUrl: '/Templates/SheetConfirm.html',
+                        templateUrl: '/campaignTrackly/CampaignTracklyWeb/Templates/SheetConfirm.html',
                         parent: angular.element(document.body),
                         targetEvent: ev,
                         clickOutsideToClose: false,
