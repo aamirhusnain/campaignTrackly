@@ -143,7 +143,7 @@ app.controller('myCtrl', function ($scope, $mdToast, $log, $mdDialog, $element) 
                   
                     $mdDialog.show({
                         scope: $scope.$new(),
-                       // templateUrl: '/Templates/SheetConfirm.html',
+                     //   templateUrl: '/Templates/SheetConfirm.html',
                         templateUrl: '/campaignTrackly/CampaignTracklyWeb/Templates/SheetConfirm.html',
                         parent: angular.element(document.body),
                         targetEvent: ev,
@@ -726,10 +726,6 @@ app.controller('myCtrl', function ($scope, $mdToast, $log, $mdDialog, $element) 
 
 
 
-
-
-
-
                 function GetAllCustTags() {
                     return new Promise((resolve, reject) => {
                         $.ajax({
@@ -822,6 +818,8 @@ app.controller('myCtrl', function ($scope, $mdToast, $log, $mdDialog, $element) 
                                         let sheet = myWorkbook.worksheets.getActiveWorksheet();
 
                                         let range = sheet.getUsedRange();
+                                    //    range.numberFormat = "m/d/yyyy h:mm";
+                                      //  range.numberFormat = [["[$-409]m/d/yy h:mm AM/PM;@"]];
 
                                         return context.sync().then(function () {
                                             var DataResults = range.load("values");
@@ -926,14 +924,14 @@ app.controller('myCtrl', function ($scope, $mdToast, $log, $mdDialog, $element) 
                                                             indxOfSource = i;
                                                         } else {
                                                             // if (headerList[i] != "result" && headerList[i] != "short links" && headerList[i] != "date") {
-                                                            if (CustomTagAPI.includes(headerList[i])) {
+                                                        //    if (CustomTagAPI.includes(headerList[i])) {
                                                                 var CustomTagObj = {
                                                                     "TagName": headerList[i],
                                                                     "TagIndex": i
                                                                 };
                                                                 OtherTags.push(CustomTagObj);
                                                                 CustomTagObj = {};
-                                                            };
+                                                           // };
 
                                                         };
                                                     };
@@ -989,6 +987,106 @@ app.controller('myCtrl', function ($scope, $mdToast, $log, $mdDialog, $element) 
 
                                                             if (response.code != "401") {
 
+
+
+
+                                                                var dateIndexs = [];
+                                                                var Headers = $scope.UsedSheetValues[0];
+
+                                                                for (var i = 0; i < Headers.length; i++) {
+
+                                                                    if (Headers[i].toLowerCase().includes("date")) {
+                                                                        dateIndexs.push(i);
+                                                                    };
+
+
+                                                                };
+                                                                console.log(dateIndexs);
+                                                                console.log($scope.UsedSheetValues);
+
+
+
+                                                                function getJsDateTimeFromExcel(excelDateValue) {
+                                                                    // Convert Excel date to milliseconds since January 1, 1970 (Unix epoch)
+                                                                    const msSinceUnixEpoch = (excelDateValue - (25567 + 2)) * 86400 * 1000;
+
+                                                                    // Create a new JavaScript Date object from milliseconds
+                                                                    const jsDate = new Date(msSinceUnixEpoch);
+
+                                                                    // Get the hours in UTC (Coordinated Universal Time)
+                                                                    const hoursInUTC = jsDate.getUTCHours();
+
+                                                                    // Get the minutes
+                                                                    const minutes = jsDate.getMinutes();
+
+                                                                    // Convert hours to your local time zone (modify the offset as needed)
+                                                                    const timeZoneOffsetInHours = 0; // Replace with your local time zone offset in hours
+                                                                    const hours = (hoursInUTC + timeZoneOffsetInHours) % 24;
+
+                                                                    // Convert hours and minutes to 24-hour format strings
+                                                                    const hoursString = hours < 10 ? `0${hours}` : `${hours}`;
+                                                                    const minutesString = minutes < 10 ? `0${minutes}` : `${minutes}`;
+
+                                                                    // Format the date and time as "MM/DD/YYYY HH:mm" and return the string
+                                                                    return `${jsDate.getMonth() + 1}/${jsDate.getDate()}/${jsDate.getFullYear()} ${hoursString}:${minutesString}`;
+                                                                }
+
+
+
+                                                                function findDateColumnIndex(headerRow) {
+                                                                    const dateColumnKeywords = ["DATE", "TIME", "Start Date", "End Date", "Event Date"]; // Add more variations if needed
+
+                                                                    for (let i = 0; i < headerRow.length; i++) {
+                                                                        const header = headerRow[i].toUpperCase().trim();
+                                                                        if (dateColumnKeywords.some(keyword => header.includes(keyword.toUpperCase()))) {
+                                                                            return i;
+                                                                        }
+                                                                    }
+
+                                                                    return -1; // Return -1 if the date column is not found
+                                                                }
+
+
+                                                                function convertDateColumnToJSDate(dataArray) {
+                                                                    const headerRow = dataArray[0];
+
+                                                                    // Find the index of the "DATE" column
+                                                                    // const dateColumnIndex = headerRow.findIndex((header) => header === "DATE");
+
+
+                                                                    const dateColumnIndex = findDateColumnIndex(headerRow);
+                                                                    console.log(dateColumnIndex); // 
+
+                                                                    if (dateColumnIndex === -1) {
+                                                                        console.error("Date column not found in the data.");
+                                                                        return dataArray; // Return the original array if the "DATE" column is not found
+                                                                    }
+
+                                                                    // Loop through the array starting from the second row (skipping the header)
+                                                                    for (let i = 1; i < dataArray.length; i++) {
+                                                                        const excelDate = dataArray[i][dateColumnIndex];
+
+                                                                        // Convert the Excel date to JavaScript Date format
+                                                                        const jsDate = getJsDateTimeFromExcel(excelDate);
+
+                                                                        // Replace the Excel date with the JavaScript Date object in the array
+                                                                        dataArray[i][dateColumnIndex] = jsDate;
+                                                                    }
+
+                                                                    return dataArray;
+                                                                }
+
+                                                                // Convert the date column to JavaScript Date format
+                                                                const dataArrayWithJSDate = convertDateColumnToJSDate($scope.UsedSheetValues);
+
+                                                               // console.log(dataArrayWithJSDate);
+
+
+
+
+
+
+                                                                
                                                                 $scope.result_Links = response;
 
                                                                 if ($scope.result_Links[0].links.length > 0) {
@@ -1034,7 +1132,7 @@ app.controller('myCtrl', function ($scope, $mdToast, $log, $mdDialog, $element) 
                                                                         markers[i] = sheet.getRange(Aplhabet + 1);
                                                                         markers[i].values = HeadNames[n];
                                                                         if (n < HeadNames.length) {
-                                                                            if (HeadNames[n] != "Result" && HeadNames[n] != "Short Links" && HeadNames[n] != "Date" && HeadNames[n] != "QR Code") {
+                                                                            if (HeadNames[n] != "Result" && HeadNames[n] != "Short Links" && HeadNames[n] != "QR Code") {
                                                                                 lastColName = Aplhabet;
                                                                             };
                                                                         };
@@ -1161,7 +1259,7 @@ app.controller('myCtrl', function ($scope, $mdToast, $log, $mdDialog, $element) 
                                                                                                     markers[i] = Actsheet.getRange(Aplhabet + 1);
                                                                                                     markers[i].values = HeadNames[n];
                                                                                                     if (n < HeadNames.length) {
-                                                                                                        if (HeadNames[n] != "Result" && HeadNames[n] != "Short Links" && HeadNames[n] != "Date" && HeadNames[n] != "QR Code") {
+                                                                                                        if (HeadNames[n] != "Result" && HeadNames[n] != "Short Links" && HeadNames[n] != "QR Code") {
                                                                                                             lastColName = Aplhabet;
                                                                                                         }
                                                                                                     };
@@ -1417,7 +1515,6 @@ app.controller('myCtrl', function ($scope, $mdToast, $log, $mdDialog, $element) 
                                                                     "medium": AllNameUrlArr[i].UtmMedium,
                                                                     "terms":
                                                                         (AllNameUrlArr[i].UtmTerm === "" ? [] : [AllNameUrlArr[i].UtmTerm])
-
                                                                 },
                                                                 "content": AllNameUrlArr[i].ContentTag,
                                                                 "custom": custArr
@@ -1456,6 +1553,100 @@ app.controller('myCtrl', function ($scope, $mdToast, $log, $mdDialog, $element) 
                                                         };
 
 
+                                                        var dateIndexs = [];
+                                                        var Headers = $scope.UsedSheetValues[0];
+
+                                                        for (var i = 0; i < Headers.length; i++) {
+
+                                                            if (Headers[i].toLowerCase().includes("date")) {
+                                                                dateIndexs.push(i);
+                                                            };
+
+
+                                                        };
+                                                        console.log(dateIndexs);
+                                                        console.log($scope.UsedSheetValues);
+
+
+
+                                                        function getJsDateTimeFromExcel(excelDateValue) {
+                                                            // Convert Excel date to milliseconds since January 1, 1970 (Unix epoch)
+                                                            const msSinceUnixEpoch = (excelDateValue - (25567 + 2)) * 86400 * 1000;
+
+                                                            // Create a new JavaScript Date object from milliseconds
+                                                            const jsDate = new Date(msSinceUnixEpoch);
+
+                                                            // Get the hours in UTC (Coordinated Universal Time)
+                                                            const hoursInUTC = jsDate.getUTCHours();
+
+                                                            // Get the minutes
+                                                            const minutes = jsDate.getMinutes();
+
+                                                            // Convert hours to your local time zone (modify the offset as needed)
+                                                            const timeZoneOffsetInHours = 0; // Replace with your local time zone offset in hours
+                                                            const hours = (hoursInUTC + timeZoneOffsetInHours) % 24;
+
+                                                            // Convert hours and minutes to 24-hour format strings
+                                                            const hoursString = hours < 10 ? `0${hours}` : `${hours}`;
+                                                            const minutesString = minutes < 10 ? `0${minutes}` : `${minutes}`;
+
+                                                            // Format the date and time as "MM/DD/YYYY HH:mm" and return the string
+                                                            return `${jsDate.getMonth() + 1}/${jsDate.getDate()}/${jsDate.getFullYear()} ${hoursString}:${minutesString}`;
+                                                        }
+
+
+
+                                                        function findDateColumnIndex(headerRow) {
+                                                            const dateColumnKeywords = ["DATE", "TIME", "Start Date", "End Date", "Event Date"]; // Add more variations if needed
+
+                                                            for (let i = 0; i < headerRow.length; i++) {
+                                                                const header = headerRow[i].toUpperCase().trim();
+                                                                if (dateColumnKeywords.some(keyword => header.includes(keyword.toUpperCase()))) {
+                                                                    return i;
+                                                                }
+                                                            }
+
+                                                            return -1; // Return -1 if the date column is not found
+                                                        }
+
+
+                                                        function convertDateColumnToJSDate(dataArray) {
+                                                            const headerRow = dataArray[0];
+
+                                                            // Find the index of the "DATE" column
+                                                            // const dateColumnIndex = headerRow.findIndex((header) => header === "DATE");
+
+
+                                                            const dateColumnIndex = findDateColumnIndex(headerRow);
+                                                            console.log(dateColumnIndex); // 
+
+                                                            if (dateColumnIndex === -1) {
+                                                                console.error("Date column not found in the data.");
+                                                                return dataArray; // Return the original array if the "DATE" column is not found
+                                                            }
+
+                                                            // Loop through the array starting from the second row (skipping the header)
+                                                            for (let i = 1; i < dataArray.length; i++) {
+                                                                const excelDate = dataArray[i][dateColumnIndex];
+
+                                                                // Convert the Excel date to JavaScript Date format
+                                                                const jsDate = getJsDateTimeFromExcel(excelDate);
+
+                                                                // Replace the Excel date with the JavaScript Date object in the array
+                                                                dataArray[i][dateColumnIndex] = jsDate;
+                                                            }
+
+                                                            return dataArray;
+                                                        }
+
+                                                        // Convert the date column to JavaScript Date format
+                                                        const dataArrayWithJSDate = convertDateColumnToJSDate($scope.UsedSheetValues);
+
+                                                      //  console.log(dataArrayWithJSDate);
+
+
+
+
                                                         $scope.result_Links = result;
 
                                                         if (result.code != "401") {
@@ -1471,10 +1662,12 @@ app.controller('myCtrl', function ($scope, $mdToast, $log, $mdDialog, $element) 
                                                                     if (i != 0) {
                                                                         for (var m = 0; m < $scope.result_Links.length; m++) {
                                                                             if ($scope.result_Links[m].links.length > 0) {
-                                                                                for (var n = 0; n < $scope.result_Links[m].links.length; n++) {
-                                                                                    FinalSheetSet.push($scope.UsedSheetValues[i]);
-                                                                                };
-                                                                                i++;
+                                                                      //   console.log("Date");
+                                                                                    for (var n = 0; n < $scope.result_Links[m].links.length; n++) {
+                                                                                        FinalSheetSet.push($scope.UsedSheetValues[i]);
+                                                                                    };
+                                                                                    i++;
+                                                                               
                                                                             } else {
                                                                                 FinalSheetSet.push($scope.UsedSheetValues[i]);
                                                                             };
@@ -1552,7 +1745,7 @@ app.controller('myCtrl', function ($scope, $mdToast, $log, $mdDialog, $element) 
                                                                                                 markers[i] = Actsheet.getRange(Aplhabet + 1);
                                                                                                 markers[i].values = HeadNames[n];
                                                                                                 if (n < HeadNames.length) {
-                                                                                                    if (HeadNames[n] != "Result" && HeadNames[n] != "Short Links" && HeadNames[n] != "Date" && HeadNames[n] != "QR Code") {
+                                                                                                    if (HeadNames[n] != "Result" && HeadNames[n] != "Short Links" && HeadNames[n] != "QR Code") {
                                                                                                         lastColName = Aplhabet;
                                                                                                     }
                                                                                                 };
@@ -1620,7 +1813,7 @@ app.controller('myCtrl', function ($scope, $mdToast, $log, $mdDialog, $element) 
                                                                                                 markers[i] = Actsheet.getRange(Aplhabet + 1);
                                                                                                 markers[i].values = HeadNames[n];
                                                                                                 if (n < HeadNames.length) {
-                                                                                                    if (HeadNames[n] != "Result" && HeadNames[n] != "Short Links" && HeadNames[n] != "Date" && HeadNames[n] != "QR Code") {
+                                                                                                    if (HeadNames[n] != "Result" && HeadNames[n] != "Short Links"  && HeadNames[n] != "QR Code") {
                                                                                                         lastColName = Aplhabet;
                                                                                                     }
                                                                                                 };
@@ -1705,7 +1898,7 @@ app.controller('myCtrl', function ($scope, $mdToast, $log, $mdDialog, $element) 
                                                                                         markers[i] = sheet.getRange(Aplhabet + 1);
                                                                                         markers[i].values = HeadNames[n];
                                                                                         if (n < HeadNames.length) {
-                                                                                            if (HeadNames[n] != "Result" && HeadNames[n] != "Short Links" && HeadNames[n] != "Date" && HeadNames[n] != "QR Code") {
+                                                                                            if (HeadNames[n] != "Result" && HeadNames[n] != "Short Links" && HeadNames[n] != "QR Code") {
                                                                                                 lastColName = Aplhabet;
                                                                                             };
                                                                                         };
