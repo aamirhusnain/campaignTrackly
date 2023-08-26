@@ -222,7 +222,7 @@
 
                 <md-input-container class="md-block" ng-click="SelectMenuTouch()">
                     <label>Select Tag Template</label>
-                    <md-select ng-model="SelectedOption" md-on-close="clearSearchTerm()" md-container-class="selectdemoSelectHeader" md-on-open="scrollToFirstItem()" id="selectMenu">
+                    <md-select ng-model="SelectedOption" md-on-close="clearSearchTerm()" md-container-class="selectdemoSelectHeader" md-on-open="scrollToFirstItem()" id="selectMenu"  ng-change="onSelectChange()">
                         <md-select-header class="demo-select-header">
                             <div id="targetDiv" style="padding:0 3px 0 3px;">
                                 <input ng-model="searchTerm" aria-label="Tag filter" type="search" placeholder="Search Tag Template" id="searchInput" class="demo-header-searchbox md-text">

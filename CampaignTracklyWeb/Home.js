@@ -40,7 +40,16 @@ app.controller('myCtrl', function ($scope, $mdToast, $log, $mdDialog, $element) 
             return decrypted.toString(CryptoJS.enc.Utf8);
         };
 
-         var BaseURL = "https://devapp.campaigntrackly.com";
+
+        /////////// check user is logined or not ///////////
+        var getFromLocal = window.localStorage.getItem("APIToken");
+        if (getFromLocal != null) {
+            getFromLocal = JSON.parse(getFromLocal);
+            APIToken = getFromLocal.token;
+        };
+
+
+        var BaseURL = "https://devapp.campaigntrackly.com";
       //     var BaseURL = "https://app.campaigntrackly.com";
 
         /////////// show the started screen to user ///////////
@@ -78,32 +87,35 @@ app.controller('myCtrl', function ($scope, $mdToast, $log, $mdDialog, $element) 
 
 
 
-        $scope.downloadImage = async function (url, fileName) {
-            ProgressLinearActive();
-            // Create a fetch request for the image.
-            const request = new Request(url);
+        //$scope.downloadImage = async function (url, fileName) {
+        //    ProgressLinearActive();
+        //    // Create a fetch request for the image.
+        //    const request = new Request(url);
 
-            // Make the request and get the response.
-            const response = await fetch(request);
+        //    // Make the request and get the response.
+        //    const response = await fetch(request);
 
-            // Check if the response is successful.
-            if (response.ok) {
-                // Create a Blob object from the response.
-                const blob = await response.blob();
+        //    // Check if the response is successful.
+        //    if (response.ok) {
+        //        // Create a Blob object from the response.
+        //        const blob = await response.blob();
 
-                // Create a URL for the Blob object.
-                const blobUrl = window.URL.createObjectURL(blob);
+        //        // Create a URL for the Blob object.
+        //        const blobUrl = window.URL.createObjectURL(blob);
 
-                // Create an anchor element and set its href to the Blob URL.
-                const anchor = document.createElement('a');
-                anchor.href = blobUrl;
-                anchor.download = fileName;
+        //        // Create an anchor element and set its href to the Blob URL.
+        //        const anchor = document.createElement('a');
+        //        anchor.href = blobUrl;
+        //        anchor.download = fileName;
 
-                // Click the anchor element to download the image.
-                anchor.click();
-                ProgressLinearInActive();
-            }
-        }
+        //        // Click the anchor element to download the image.
+        //        anchor.click();
+        //        ProgressLinearInActive();
+        //    }
+        //}
+
+
+      
 
 
 
@@ -138,12 +150,218 @@ app.controller('myCtrl', function ($scope, $mdToast, $log, $mdDialog, $element) 
             try {
 
 
+
+                var AllCustoms = [];
+                var AllCustomValues = [];
+
+                $scope.onSelectChange = function () {
+                    console.log("Selected value:", $scope.SelectedOption);
+
+                     AllCustoms = [];
+                     AllCustomValues = [];
+
+                    // You can perform any additional actions here based on the selected value.
+
+                    for (var i = 0; i < $scope.SelectedOption.custom.length; i++) {
+                        AllCustoms.push($scope.SelectedOption.custom[i].title);
+                    };
+
+
+                    //AllCustoms.forEach(Cus => {
+                    //    if (Cus == $scope.SelectedOption.custom[i].title) {
+                    //        for (var j = 0; j < $scope.SelectedOption.custom[i].values.length; j++) {
+                    //            var eachTag = [];
+                    //            eachTag.push($scope.SelectedOption.custom[i].values[j].value);
+                    //            AllCustomValues.push(eachTag);
+                    //            eachTag = [];
+                    //        };
+                    //    }
+                      
+
+                    //})
+                  
+
+                   
+
+                    console.log(AllCustoms);
+                    console.log(AllCustomValues);
+
+
+
+                    AllCustomValues = $scope.SelectedOption.custom;
+
+
+                    setData($scope.SelectedOption.custom);
+
+                };
+
+
+                async function setData(data) {
+                    try {
+                        await Excel.run(async (context) => {
+                            let sheet = context.workbook.worksheets.getItem("Settings");
+
+                            // Clear the existing content of the sheet
+                            sheet.getUsedRange().clear();
+
+                            // Start row and column for data insertion
+                            let startRow = 1; // Start from the second row
+                            let startColumn = 0; // Start from the first column
+
+                            // Set headers (excluding "id")
+                            const headers = data.map(item => item.title || 'id');
+                            sheet.getRangeByIndexes(startRow - 1, startColumn, 1, headers.length).values = [headers];
+
+                            // Populate data
+                            const maxValuesCount = Math.max(...data.map(item => item.values.length));
+
+                            for (let valueIndex = 0; valueIndex < maxValuesCount; valueIndex++) {
+                                const rowData = [];
+                                data.forEach(item => {
+                                    const value = item.values[valueIndex] ? item.values[valueIndex].value : '';
+                                    rowData.push(value);
+                                });
+                                sheet.getRangeByIndexes(startRow, startColumn, 1, rowData.length).values = [rowData];
+                                startRow++;
+                            };
+
+                            // Autofit columns (optional)
+                            sheet.getUsedRange().format.autofitColumns();
+
+                            await context.sync();
+                        });
+                        console.log("Data set successfully.");
+                    } catch (error) {
+                        console.error("Error:", error);
+                    }
+                };
+
+
+
+
+
+                //Excel.run(async (context) => {
+                //    let sheet = context.workbook.worksheets.getActiveWorksheet();
+
+                //    let usedRange = sheet.getUsedRange();
+                //    usedRange.load("address");
+
+
+
+                //    return context.sync().then(function () {
+                        
+                //        let cellAddress = usedRange.address;
+                //   //     let addressWithoutSheet = cellAddress.split("!")[1];
+                //   //   console.log(addressWithoutSheet);
+
+
+
+
+
+                //    });
+                //}).catch((error) => {
+                //    console.error(error);
+                //});
+
+
+
+
+
+
+
+                if (APIToken) {
+
+
+                    $.ajax({
+                        url: BaseURL + '/wp-json/campaigntrackly/v1/custom_tags',
+                        method: 'GET',
+                        headers: {
+                            'accept': 'application/json',
+                            'Authorization': 'Bearer ' + APIToken
+                        },
+                        success: function (response) {
+                          //  console.log(response);
+
+                            var customTags = [];
+
+                            for (var i = 0; i < response.length; i++) {
+                                customTags.push([response[i].custom]);
+
+                                //for (let j = 0; j < response[i].values.length; j++) {
+                                //    customTags.push([response[i].values[j].tag]);
+
+                                //};
+                            };
+
+
+
+
+                            Excel.run(function (context) {
+                                var workbook = context.workbook;
+                                var worksheets = workbook.worksheets;
+                                var newSheetName = "Settings";
+
+                                var existingSheet = worksheets.getItemOrNullObject(newSheetName);
+                                existingSheet.load("name");
+
+
+                                return context.sync()
+
+
+                                    .then(function () {
+                                        if (existingSheet.isNullObject) {
+                                            var newSheet = worksheets.add(newSheetName);
+
+                                            newSheet.getRange().clear();
+
+                                            //var CustomTagRange = newSheet.getRange("A1:A" + customTags.length);
+                                            //CustomTagRange.values = customTags;
+                                            //CustomTagRange.format.autofitColumns();
+
+
+                                            return context.sync()
+                                                .then(function () {
+
+                                                });
+                                        } else {
+                                            console.log("already");
+
+
+                                            var SettingSheet = context.workbook.worksheets.getItem(newSheetName); 
+                                            SettingSheet.getRange().clear();
+
+
+                                        };
+
+
+                                    });
+                            }).catch(function (error) {
+                                // console.log(error);
+                            });
+
+
+                        },
+                        error: function (error) {
+                            // Handle the error response here
+                            console.log(error);
+
+                        }
+                    });
+
+
+                };
+
+                
+
+
+
+
                 $scope.OpenDialog = function (ev) {
                  
                   
                     $mdDialog.show({
                         scope: $scope.$new(),
-                     //   templateUrl: '/Templates/SheetConfirm.html',
+                      //  templateUrl: '/Templates/SheetConfirm.html',
                         templateUrl: '/campaignTrackly/CampaignTracklyWeb/Templates/SheetConfirm.html',
                         parent: angular.element(document.body),
                         targetEvent: ev,
@@ -184,6 +402,11 @@ app.controller('myCtrl', function ($scope, $mdToast, $log, $mdDialog, $element) 
 
 
                             if (cellValue != "") {
+
+
+
+
+
                                 /////////// Chat with GPT ///////////
 
                                 var settings = {
@@ -269,7 +492,15 @@ app.controller('myCtrl', function ($scope, $mdToast, $log, $mdDialog, $element) 
                 };
 
 
+                function getAlphabeticCharacter(number) {
+                    if (typeof number !== 'number' || number < 1 || number > 26) {
+                        return 'Invalid';
+                    }
 
+                    const charCode = number + 96;
+                    const character = String.fromCharCode(charCode);
+                    return character.toUpperCase();
+                };
 
                 function checkWordOrSentence(input) {
                     // Remove leading and trailing whitespace from the input
@@ -299,6 +530,67 @@ app.controller('myCtrl', function ($scope, $mdToast, $log, $mdDialog, $element) 
                     return splidtedArr[1];
                 };
                 function checkSpelling(text, beforeWord, adressOfCell) {
+
+
+
+                    console.log(text);
+
+                   // AllCustoms
+
+                    if (AllCustoms.includes(text)) {
+
+
+                        let index = AllCustoms.indexOf(text);
+
+                        var lengthOfCusArr = AllCustomValues[index].values.length;
+                       
+
+                        Excel.run(function (context) {
+
+
+                            let sheet = context.workbook.worksheets.getActiveWorksheet();
+                            let updatedAddress = adressOfCell.replace(/\d+$/, 2);
+
+                            const cellOfCustom = sheet.getRange(updatedAddress);
+
+                            // Step 2: Define the data source range for the dropdown list
+                            const nameSourceRange = context.workbook.worksheets.getItem("Settings").getRange(getAlphabeticCharacter(index + 1) + "2:" + getAlphabeticCharacter(index + 1) + "1000");
+                           // const nameSourceRange = context.workbook.worksheets.getItem("Settings").getRange(getAlphabeticCharacter(index + 1) + "2:" + getAlphabeticCharacter(index + 1) + (lengthOfCusArr + 1));
+
+                            let approvedListRule = {
+                                list: {
+                                    inCellDropdown: true,
+                                    source: nameSourceRange
+                                }
+                            };
+                            cellOfCustom.dataValidation.clear();
+                            cellOfCustom.dataValidation.rule = approvedListRule;
+
+
+                            //sheet.activate();
+                            return context.sync()
+                                .then(function () {
+
+
+                                });
+
+                        });
+
+
+
+
+                    };
+
+
+
+
+
+
+
+
+
+
+
 
                     var endpoint = 'https://api.openai.com/v1/chat/completions';
 
@@ -416,12 +708,7 @@ app.controller('myCtrl', function ($scope, $mdToast, $log, $mdDialog, $element) 
 
 
 
-                /////////// check user is logined or not ///////////
-                var getFromLocal = window.localStorage.getItem("APIToken");
-                if (getFromLocal != null) {
-                    getFromLocal = JSON.parse(getFromLocal);
-                    APIToken = getFromLocal.token;
-                };
+              
 
                 /////////// check token expiration ///////////
                 function isTokenExpired(token) {
