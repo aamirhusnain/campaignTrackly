@@ -1,4 +1,4 @@
-﻿var app = angular.module('myApp', ['ngMaterial'], function ($mdThemingProvider) {
+var app = angular.module('myApp', ['ngMaterial'], function ($mdThemingProvider) {
 
     $mdThemingProvider.theme('default')
         .primaryPalette('green', {
@@ -151,6 +151,89 @@ app.controller('myCtrl', function ($scope, $mdToast, $log, $mdDialog, $element) 
 
 
 
+
+                var AllCustomTagName = [];
+
+                if (APIToken) {
+
+
+                    $.ajax({
+                        url: BaseURL + '/wp-json/campaigntrackly/v1/custom_tags',
+                        method: 'GET',
+                        headers: {
+                            'accept': 'application/json',
+                            'Authorization': 'Bearer ' + APIToken
+                        },
+                        success: function (response) {
+                              console.log(response);
+                            AllCustomTagName = response;
+
+                            //var customTags = [];
+
+                            //for (var i = 0; i < response.length; i++) {
+                            //    customTags.push([response[i].custom]);
+                            //};
+
+                            //console.log(customTags);
+                            console.log(AllCustomTagName);
+
+
+                            Excel.run(function (context) {
+                                var workbook = context.workbook;
+                                var worksheets = workbook.worksheets;
+                                var newSheetName = "Settings";
+
+                                var existingSheet = worksheets.getItemOrNullObject(newSheetName);
+                                existingSheet.load("name");
+
+
+                                return context.sync()
+
+
+                                    .then(function () {
+                                        if (existingSheet.isNullObject) {
+                                            var newSheet = worksheets.add(newSheetName);
+
+                                            newSheet.getRange().clear();
+
+                                            //var CustomTagRange = newSheet.getRange("A1:A" + customTags.length);
+                                            //CustomTagRange.values = customTags;
+                                            //CustomTagRange.format.autofitColumns();
+
+
+                                            return context.sync()
+                                                .then(function () {
+
+                                                });
+                                        } else {
+                                            console.log("already");
+
+
+                                            var SettingSheet = context.workbook.worksheets.getItem(newSheetName);
+                                            SettingSheet.getRange().clear();
+
+
+                                        };
+
+
+                                    });
+                            }).catch(function (error) {
+                                // console.log(error);
+                            });
+
+
+                        },
+                        error: function (error) {
+                            // Handle the error response here
+                            console.log(error);
+
+                        }
+                    });
+
+
+                };
+
+
                 var AllCustoms = [];
                 var AllCustomValues = [];
 
@@ -176,22 +259,40 @@ app.controller('myCtrl', function ($scope, $mdToast, $log, $mdDialog, $element) 
                     //            eachTag = [];
                     //        };
                     //    }
-                      
+
 
                     //})
-                  
 
-                   
 
-                    console.log(AllCustoms);
-                    console.log(AllCustomValues);
+
+
+                    //AllCustoms.forEach(cus => {
+
+                    //    if () {
+
+                    //    }
+
+
+                    //});
+
+
+                    function searchData(jsonArray, searchParams) {
+                        return jsonArray.filter(item => searchParams.includes(item.custom));
+                    }
+
+                    const searchResults = searchData(AllCustomTagName, AllCustoms);
+                    console.log(searchResults);
+
+
+                    //console.log(AllCustoms);
+                    //console.log(AllCustomValues);
 
 
 
                     AllCustomValues = $scope.SelectedOption.custom;
 
 
-                    setData($scope.SelectedOption.custom);
+                    setData(searchResults);
 
                 };
 
@@ -209,7 +310,7 @@ app.controller('myCtrl', function ($scope, $mdToast, $log, $mdDialog, $element) 
                             let startColumn = 0; // Start from the first column
 
                             // Set headers (excluding "id")
-                            const headers = data.map(item => item.title || 'id');
+                            const headers = data.map(item => item.custom);
                             sheet.getRangeByIndexes(startRow - 1, startColumn, 1, headers.length).values = [headers];
 
                             // Populate data
@@ -218,7 +319,7 @@ app.controller('myCtrl', function ($scope, $mdToast, $log, $mdDialog, $element) 
                             for (let valueIndex = 0; valueIndex < maxValuesCount; valueIndex++) {
                                 const rowData = [];
                                 data.forEach(item => {
-                                    const value = item.values[valueIndex] ? item.values[valueIndex].value : '';
+                                    const value = item.values[valueIndex] ? item.values[valueIndex].tag : '';
                                     rowData.push(value);
                                 });
                                 sheet.getRangeByIndexes(startRow, startColumn, 1, rowData.length).values = [rowData];
@@ -269,87 +370,7 @@ app.controller('myCtrl', function ($scope, $mdToast, $log, $mdDialog, $element) 
 
 
 
-                if (APIToken) {
-
-
-                    $.ajax({
-                        url: BaseURL + '/wp-json/campaigntrackly/v1/custom_tags',
-                        method: 'GET',
-                        headers: {
-                            'accept': 'application/json',
-                            'Authorization': 'Bearer ' + APIToken
-                        },
-                        success: function (response) {
-                          //  console.log(response);
-
-                            var customTags = [];
-
-                            for (var i = 0; i < response.length; i++) {
-                                customTags.push([response[i].custom]);
-
-                                //for (let j = 0; j < response[i].values.length; j++) {
-                                //    customTags.push([response[i].values[j].tag]);
-
-                                //};
-                            };
-
-
-
-
-                            Excel.run(function (context) {
-                                var workbook = context.workbook;
-                                var worksheets = workbook.worksheets;
-                                var newSheetName = "Settings";
-
-                                var existingSheet = worksheets.getItemOrNullObject(newSheetName);
-                                existingSheet.load("name");
-
-
-                                return context.sync()
-
-
-                                    .then(function () {
-                                        if (existingSheet.isNullObject) {
-                                            var newSheet = worksheets.add(newSheetName);
-
-                                            newSheet.getRange().clear();
-
-                                            //var CustomTagRange = newSheet.getRange("A1:A" + customTags.length);
-                                            //CustomTagRange.values = customTags;
-                                            //CustomTagRange.format.autofitColumns();
-
-
-                                            return context.sync()
-                                                .then(function () {
-
-                                                });
-                                        } else {
-                                            console.log("already");
-
-
-                                            var SettingSheet = context.workbook.worksheets.getItem(newSheetName); 
-                                            SettingSheet.getRange().clear();
-
-
-                                        };
-
-
-                                    });
-                            }).catch(function (error) {
-                                // console.log(error);
-                            });
-
-
-                        },
-                        error: function (error) {
-                            // Handle the error response here
-                            console.log(error);
-
-                        }
-                    });
-
-
-                };
+               
 
                 
 
@@ -402,10 +423,6 @@ app.controller('myCtrl', function ($scope, $mdToast, $log, $mdDialog, $element) 
 
 
                             if (cellValue != "") {
-
-
-
-
 
                                 /////////// Chat with GPT ///////////
 
