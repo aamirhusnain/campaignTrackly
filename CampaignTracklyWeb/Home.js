@@ -1,4 +1,4 @@
-var app = angular.module('myApp', ['ngMaterial'], function ($mdThemingProvider) {
+﻿var app = angular.module('myApp', ['ngMaterial'], function ($mdThemingProvider) {
 
     $mdThemingProvider.theme('default')
         .primaryPalette('green', {
@@ -246,7 +246,10 @@ app.controller('myCtrl', function ($scope, $mdToast, $log, $mdDialog, $element) 
                     // You can perform any additional actions here based on the selected value.
 
                     for (var i = 0; i < $scope.SelectedOption.custom.length; i++) {
-                        AllCustoms.push($scope.SelectedOption.custom[i].title);
+                        if ($scope.SelectedOption.custom[i].title != null) {
+                            AllCustoms.push($scope.SelectedOption.custom[i].title);
+
+                        }
                     };
 
 
@@ -283,13 +286,13 @@ app.controller('myCtrl', function ($scope, $mdToast, $log, $mdDialog, $element) 
                     const searchResults = searchData(AllCustomTagName, AllCustoms);
                     console.log(searchResults);
 
-
+                    AllCustomValues = searchResults;
                     //console.log(AllCustoms);
                     //console.log(AllCustomValues);
 
 
 
-                    AllCustomValues = $scope.SelectedOption.custom;
+                   // AllCustomValues = $scope.SelectedOption.custom;
 
 
                     setData(searchResults);
@@ -571,8 +574,8 @@ app.controller('myCtrl', function ($scope, $mdToast, $log, $mdDialog, $element) 
                             const cellOfCustom = sheet.getRange(updatedAddress);
 
                             // Step 2: Define the data source range for the dropdown list
-                            const nameSourceRange = context.workbook.worksheets.getItem("Settings").getRange(getAlphabeticCharacter(index + 1) + "2:" + getAlphabeticCharacter(index + 1) + "1000");
-                           // const nameSourceRange = context.workbook.worksheets.getItem("Settings").getRange(getAlphabeticCharacter(index + 1) + "2:" + getAlphabeticCharacter(index + 1) + (lengthOfCusArr + 1));
+                            //const nameSourceRange = context.workbook.worksheets.getItem("Settings").getRange(getAlphabeticCharacter(index + 1) + "2:" + getAlphabeticCharacter(index + 1) + "1000");
+                            const nameSourceRange = context.workbook.worksheets.getItem("Settings").getRange(getAlphabeticCharacter(index + 1) + "2:" + getAlphabeticCharacter(index + 1) + (lengthOfCusArr + 1));
 
                             let approvedListRule = {
                                 list: {
@@ -687,6 +690,25 @@ app.controller('myCtrl', function ($scope, $mdToast, $log, $mdDialog, $element) 
                 }).catch(function (error) {
                  //   console.log(error);
                 });
+
+
+
+                //Excel.run(function (context) {
+                //    var sheets = context.workbook.worksheets;
+
+                //    // Iterate through each worksheet
+                //    sheets.load("items");
+                //    return context.sync().then(function () {
+                //        for (var i = 0; i < sheets.items.length; i++) {
+                //            var sheet = sheets.items[i];
+                //            sheet.onChanged.add($scope.handleOnChange);
+                //        }
+                //        return context.sync();
+                //    });
+                //}).catch(function (error) {
+                //    console.log(error);
+                //});
+
 
 
                 $scope.handleOnChange = function (eventArgs) {
