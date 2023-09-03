@@ -336,11 +336,12 @@ app.controller('myCtrl', function ($scope, $mdToast, $log, $mdDialog, $element) 
 
                             var OldCustom = window.localStorage.getItem("LastAddress");
 
-                            const modifiedString = OldCustom.replace(/\d+$/, "200");
+                            
 
 
 
-                            if (modifiedString != null) {
+                            if (OldCustom != null) {
+                                const modifiedString = OldCustom.replace(/\d+$/, "200");
                                 let usedRangeCustom = sheet.getRange(modifiedString);
                                 usedRangeCustom.clear();
                             }
