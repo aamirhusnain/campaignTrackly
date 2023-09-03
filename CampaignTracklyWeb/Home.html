@@ -103,11 +103,19 @@
                     Campaign Trackly
                 </h3>
 
+
+
                 <md-button class="md-icon-button" ng-click="chatGpt()" style="margin-right:-5px;" aria-label="chat">
                     <md-tooltip md-direction="bottom">{{tooltipText}}</md-tooltip>
-                    <img id="loaderGpt"  class="loader" src="Images/openai-icon.svg" />
+                    <img id="loaderGpt" class="loader" src="Images/openai-icon.svg" />
                     <img ng-hide="gptBtn" src="Images/openai-icon.svg" style="width: 85%; margin-top: 3px;" />
                 </md-button>
+
+                <md-button class="md-icon-button" ng-click="SetAsManual()" style="margin-right:-5px;" aria-label="chat">
+                    <md-tooltip md-direction="bottom">Manually Enter Tags</md-tooltip>
+                    <md-icon md-menu-align-target style="margin: auto 3px auto 0;" class="material-icons">wysiwyg</md-icon>
+                </md-button>
+
 
                 <md-menu style="margin-right: 0px;">
                     <md-icon class="favorite-icon" style="font-size: 22px; cursor: pointer; color: white;margin-left:10px;" ng-click="$mdMenu.open()">menu_open</md-icon>
@@ -240,6 +248,7 @@
 
             <div style="padding:30px;text-align:center;margin-top:-10px;">
                 <md-button ng-click="ApplyTemplate()" ng-disabled="!SelectedOption || SelectedOption === 'Dummy'" style="background-color:#2E7D32;color:#ffffff;width:95%;">Apply Template</md-button>
+                <!--<md-button ng-click="UsedRange()" style="background-color:#2E7D32;color:#ffffff;width:95%;">Used Range</md-button>-->
             </div>
 
             <!-- <md-button ng-click="OpenDialog()">Open Dialog</md-button>-->

@@ -49,8 +49,8 @@ app.controller('myCtrl', function ($scope, $mdToast, $log, $mdDialog, $element) 
         };
 
 
-        var BaseURL = "https://devapp.campaigntrackly.com";
-      //     var BaseURL = "https://app.campaigntrackly.com";
+       var BaseURL = "https://devapp.campaigntrackly.com";
+       //    var BaseURL = "https://app.campaigntrackly.com";
 
         /////////// show the started screen to user ///////////
         var checkUser = window.localStorage.getItem("UserVisted");
@@ -151,11 +151,38 @@ app.controller('myCtrl', function ($scope, $mdToast, $log, $mdDialog, $element) 
 
 
 
+                //$scope.UsedRange = function () {
+
+
+                //    Excel.run(function (context) {
+                //        var sheet = context.workbook.worksheets.getActiveWorksheet();
+                //        var usedRange = sheet.getUsedRange();
+
+                //        usedRange.load("address");
+                //        return context.sync().then(function () {
+
+                //            console.log("Used Range Address: " + usedRange.address);
+
+                //        })
+
+                //        // Now you can work with the 'usedRange' object as needed
+
+                //    }).catch(function (error) {
+                //        console.error("Error:", error);
+                //    });
+                //};
+
+
+
+
+
 
                 var AllCustomTagName = [];
 
-                if (APIToken) {
 
+
+
+                function LoadSetting() {
 
                     $.ajax({
                         url: BaseURL + '/wp-json/campaigntrackly/v1/custom_tags',
@@ -165,18 +192,8 @@ app.controller('myCtrl', function ($scope, $mdToast, $log, $mdDialog, $element) 
                             'Authorization': 'Bearer ' + APIToken
                         },
                         success: function (response) {
-                              console.log(response);
+                            // console.log(response);
                             AllCustomTagName = response;
-
-                            //var customTags = [];
-
-                            //for (var i = 0; i < response.length; i++) {
-                            //    customTags.push([response[i].custom]);
-                            //};
-
-                            //console.log(customTags);
-                            console.log(AllCustomTagName);
-
 
                             Excel.run(function (context) {
                                 var workbook = context.workbook;
@@ -196,18 +213,13 @@ app.controller('myCtrl', function ($scope, $mdToast, $log, $mdDialog, $element) 
 
                                             newSheet.getRange().clear();
 
-                                            //var CustomTagRange = newSheet.getRange("A1:A" + customTags.length);
-                                            //CustomTagRange.values = customTags;
-                                            //CustomTagRange.format.autofitColumns();
-
 
                                             return context.sync()
                                                 .then(function () {
 
                                                 });
                                         } else {
-                                            console.log("already");
-
+                                            // console.log("already");
 
                                             var SettingSheet = context.workbook.worksheets.getItem(newSheetName);
                                             SettingSheet.getRange().clear();
@@ -234,11 +246,18 @@ app.controller('myCtrl', function ($scope, $mdToast, $log, $mdDialog, $element) 
                 };
 
 
+
+
+                if (APIToken) {
+                    LoadSetting();
+                };
+
+
                 var AllCustoms = [];
                 var AllCustomValues = [];
 
                 $scope.onSelectChange = function () {
-                    console.log("Selected value:", $scope.SelectedOption);
+                  //  console.log("Selected value:", $scope.SelectedOption);
 
                      AllCustoms = [];
                      AllCustomValues = [];
@@ -269,14 +288,6 @@ app.controller('myCtrl', function ($scope, $mdToast, $log, $mdDialog, $element) 
 
 
 
-                    //AllCustoms.forEach(cus => {
-
-                    //    if () {
-
-                    //    }
-
-
-                    //});
 
 
                     function searchData(jsonArray, searchParams) {
@@ -284,7 +295,7 @@ app.controller('myCtrl', function ($scope, $mdToast, $log, $mdDialog, $element) 
                     }
 
                     const searchResults = searchData(AllCustomTagName, AllCustoms);
-                    console.log(searchResults);
+                   // console.log(searchResults);
 
                     AllCustomValues = searchResults;
                     //console.log(AllCustoms);
@@ -296,8 +307,150 @@ app.controller('myCtrl', function ($scope, $mdToast, $log, $mdDialog, $element) 
 
 
                     setData(searchResults);
+                    setHeadOnWorkingSheet(AllCustoms);
 
                 };
+
+                $scope.SetAsManual = function () {
+                    Excel.run(function (context) {
+                        // Get the selected range
+                        var selectedRange = context.workbook.getSelectedRange();
+
+                        // Clear data validation from the selected range
+                        selectedRange.dataValidation.clear();
+
+                        // Sync to apply the changes
+                        return context.sync();
+                    }).catch(function (error) {
+                        console.log(error);
+                    });
+                };
+
+
+
+
+                function setHeadOnWorkingSheet(data) {
+                    try {
+                        Excel.run(function (context) {
+                            let sheet = context.workbook.worksheets.getActiveWorksheet();
+
+                            var OldCustom = window.localStorage.getItem("LastAddress");
+
+                            const modifiedString = OldCustom.replace(/\d+$/, "200");
+
+
+
+                            if (modifiedString != null) {
+                                let usedRangeCustom = sheet.getRange(modifiedString);
+                                usedRangeCustom.clear();
+                            }
+
+                            let usedRange = sheet.getUsedRange();
+
+                            // Load the values of the used range to access cell data
+                            usedRange.load("values");
+
+                            return context.sync()
+                                .then(function () {
+                                    // Get the first row of the used range (assumed to contain column names)
+                                    let firstRow = usedRange.values[0];
+
+                                    var UsedColumn = [];
+
+                                    // Assuming the first row contains column names, you can now access them
+                                    if (firstRow && firstRow.length > 0) {
+                                        for (let columnIndex = 0; columnIndex < firstRow.length; columnIndex++) {
+                                            let columnName = firstRow[columnIndex];
+                                            UsedColumn.push(columnName);
+                                        }
+                                    }
+
+                                    var StartFrom = getAlphabeticCharacter(UsedColumn.length + 1);
+                                    var EndTo = getAlphabeticCharacter(UsedColumn.length + data.length);
+
+                                    //console.log(StartFrom);
+                                    //console.log(EndTo);
+                                    //console.log(data);
+
+                                    //const DataForSet = [];
+
+                                    //data.forEach(item => {
+                                    //    DataForSet.push([item]);
+                                    //});
+
+                                    window.localStorage.setItem("LastAddress", StartFrom + 1 + ":" + EndTo + 1);
+
+                                    var Address = sheet.getRange(StartFrom + 1 + ":" + EndTo + 1);
+                                    Address.values = [data];
+
+
+                                 
+                                    for (var i = 0; i < AllCustoms.length; i++) {
+
+                                    //    let index = AllCustoms.indexOf(text);
+
+                                        var StartDropdown = getAlphabeticCharacter(UsedColumn.length + 1 + i) + "1";
+
+
+                                        var lengthOfCusArr = AllCustomValues[i].values.length;
+                                        let updatedAddress = StartDropdown.replace(/\d+$/, 2);
+                                        const cellOfCustom = sheet.getRange(updatedAddress);
+                                        // Step 2: Define the data source range for the dropdown list
+                                        //const nameSourceRange = context.workbook.worksheets.getItem("Settings").getRange(getAlphabeticCharacter(index + 1) + "2:" + getAlphabeticCharacter(index + 1) + "1000");
+                                        const nameSourceRange = context.workbook.worksheets.getItem("Settings").getRange(getAlphabeticCharacter(i + 1) + "2:" + getAlphabeticCharacter(i + 1) + (lengthOfCusArr + 1));
+
+                                        let approvedListRule = {
+                                            list: {
+                                                inCellDropdown: true,
+                                                source: nameSourceRange
+                                            }
+                                        };
+                                        cellOfCustom.dataValidation.clear();
+                                        cellOfCustom.dataValidation.rule = approvedListRule;
+
+                                    }
+
+                                    
+
+
+                                        //sheet.activate();
+                                        return context.sync()
+                                            .then(function () {
+
+
+                                            });
+
+                                  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                    return context.sync();
+                                });
+                        }).catch(function (error) {
+                            console.error("Error:", error);
+                        });
+                    } catch (error) {
+                        console.error("Error:", error);
+                    }
+                }
+
+
+
+
 
 
                 async function setData(data) {
@@ -334,7 +487,7 @@ app.controller('myCtrl', function ($scope, $mdToast, $log, $mdDialog, $element) 
 
                             await context.sync();
                         });
-                        console.log("Data set successfully.");
+                      //  console.log("Data set successfully.");
                     } catch (error) {
                         console.error("Error:", error);
                     }
@@ -385,8 +538,8 @@ app.controller('myCtrl', function ($scope, $mdToast, $log, $mdDialog, $element) 
                   
                     $mdDialog.show({
                         scope: $scope.$new(),
-                      //  templateUrl: '/Templates/SheetConfirm.html',
-                        templateUrl: '/campaignTrackly/CampaignTracklyWeb/Templates/SheetConfirm.html',
+                      // templateUrl: '/Templates/SheetConfirm.html',
+                         templateUrl: '/campaignTrackly/CampaignTracklyWeb/Templates/SheetConfirm.html',
                         parent: angular.element(document.body),
                         targetEvent: ev,
                         clickOutsideToClose: false,
@@ -553,53 +706,53 @@ app.controller('myCtrl', function ($scope, $mdToast, $log, $mdDialog, $element) 
 
 
 
-                    console.log(text);
+                   // console.log(text);
 
                    // AllCustoms
 
-                    if (AllCustoms.includes(text)) {
+                    //if (AllCustoms.includes(text)) {
 
 
-                        let index = AllCustoms.indexOf(text);
+                    //    let index = AllCustoms.indexOf(text);
 
-                        var lengthOfCusArr = AllCustomValues[index].values.length;
+                    //    var lengthOfCusArr = AllCustomValues[index].values.length;
                        
 
-                        Excel.run(function (context) {
+                    //    Excel.run(function (context) {
 
 
-                            let sheet = context.workbook.worksheets.getActiveWorksheet();
-                            let updatedAddress = adressOfCell.replace(/\d+$/, 2);
+                    //        let sheet = context.workbook.worksheets.getActiveWorksheet();
+                    //        let updatedAddress = adressOfCell.replace(/\d+$/, 2);
 
-                            const cellOfCustom = sheet.getRange(updatedAddress);
+                    //        const cellOfCustom = sheet.getRange(updatedAddress);
 
-                            // Step 2: Define the data source range for the dropdown list
-                            //const nameSourceRange = context.workbook.worksheets.getItem("Settings").getRange(getAlphabeticCharacter(index + 1) + "2:" + getAlphabeticCharacter(index + 1) + "1000");
-                            const nameSourceRange = context.workbook.worksheets.getItem("Settings").getRange(getAlphabeticCharacter(index + 1) + "2:" + getAlphabeticCharacter(index + 1) + (lengthOfCusArr + 1));
+                    //        // Step 2: Define the data source range for the dropdown list
+                    //        //const nameSourceRange = context.workbook.worksheets.getItem("Settings").getRange(getAlphabeticCharacter(index + 1) + "2:" + getAlphabeticCharacter(index + 1) + "1000");
+                    //        const nameSourceRange = context.workbook.worksheets.getItem("Settings").getRange(getAlphabeticCharacter(index + 1) + "2:" + getAlphabeticCharacter(index + 1) + (lengthOfCusArr + 1));
 
-                            let approvedListRule = {
-                                list: {
-                                    inCellDropdown: true,
-                                    source: nameSourceRange
-                                }
-                            };
-                            cellOfCustom.dataValidation.clear();
-                            cellOfCustom.dataValidation.rule = approvedListRule;
-
-
-                            //sheet.activate();
-                            return context.sync()
-                                .then(function () {
+                    //        let approvedListRule = {
+                    //            list: {
+                    //                inCellDropdown: true,
+                    //                source: nameSourceRange
+                    //            }
+                    //        };
+                    //        cellOfCustom.dataValidation.clear();
+                    //        cellOfCustom.dataValidation.rule = approvedListRule;
 
 
-                                });
-
-                        });
-
-
+                    //        //sheet.activate();
+                    //        return context.sync()
+                    //            .then(function () {
 
 
-                    };
+                    //            });
+
+                    //    });
+
+
+
+
+                    //};
 
 
 
@@ -889,16 +1042,18 @@ app.controller('myCtrl', function ($scope, $mdToast, $log, $mdDialog, $element) 
                                         $scope.ChatGPTKey = result.data.token;
 
                                         const encryptedKey = encryptAPIKey($scope.ChatGPTKey, 'ChatGPTKey');
-                                    //    console.log(encryptedKey);
+                                        //    console.log(encryptedKey);
 
                                         window.localStorage.setItem('SecretKey', encryptedKey);
                                     },
                                     error: function (error) {
-                                   //     console.log(error);
+                                        //     console.log(error);
                                         loadToast("Connection Issue. Please contact support@campaigntrackly.com");
                                     }
-                                })
+                                });
 
+
+                                LoadSetting();
 
                                 $scope.UserName = undefined;
                                 $scope.UserPassword = undefined;
@@ -906,7 +1061,6 @@ app.controller('myCtrl', function ($scope, $mdToast, $log, $mdDialog, $element) 
                                 $scope.getTagTemplates();
 
                             };
-
 
                         } else {
                             $scope.LoginDiv = false;
