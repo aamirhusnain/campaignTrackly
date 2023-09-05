@@ -212,7 +212,7 @@ app.controller('myCtrl', function ($scope, $mdToast, $log, $mdDialog, $element) 
                                             var newSheet = worksheets.add(newSheetName);
 
                                             newSheet.getRange().clear();
-
+                                            window.localStorage.removeItem("LastAddress");
 
                                             return context.sync()
                                                 .then(function () {
@@ -336,12 +336,12 @@ app.controller('myCtrl', function ($scope, $mdToast, $log, $mdDialog, $element) 
 
                             var OldCustom = window.localStorage.getItem("LastAddress");
 
-                            
 
 
 
                             if (OldCustom != null) {
                                 const modifiedString = OldCustom.replace(/\d+$/, "200");
+
                                 let usedRangeCustom = sheet.getRange(modifiedString);
                                 usedRangeCustom.clear();
                             }
@@ -1254,7 +1254,14 @@ app.controller('myCtrl', function ($scope, $mdToast, $log, $mdDialog, $element) 
                     }
                 }
 
-
+                function getLastItemAfterSplit(inputString) {
+                    const splitArray = inputString.split('|');
+                    if (splitArray.length > 0) {
+                        return splitArray[splitArray.length - 1];
+                    } else {
+                        return '';
+                    }
+                }
 
                 function closeDialog() {
                     $mdDialog.hide();
@@ -1979,7 +1986,7 @@ app.controller('myCtrl', function ($scope, $mdToast, $log, $mdDialog, $element) 
                                                         for (let m = 0; m < CustTagForSet.length; m++) {
                                                             var CusHeadName = [OtherTags[m].TagName];
                                                             if (!CusHeadName[0].includes("date")) {
-                                                                custArr.push({ [OtherTags[m].TagName]: [CustTagForSet[m][i]] });
+                                                                custArr.push({ [OtherTags[m].TagName]: [getLastItemAfterSplit(CustTagForSet[m][i])] });
                                                             } else {
                                                                 var ChangeFormate = CustTagForSet[m][i];
                                                                 custArr.push({ [OtherTags[m].TagName]: [getJsDateFromExcel(ChangeFormate)] });
@@ -2045,8 +2052,8 @@ app.controller('myCtrl', function ($scope, $mdToast, $log, $mdDialog, $element) 
 
 
                                                         };
-                                                        console.log(dateIndexs);
-                                                        console.log($scope.UsedSheetValues);
+                                                        //console.log(dateIndexs);
+                                                        //console.log($scope.UsedSheetValues);
 
 
 
@@ -2099,10 +2106,10 @@ app.controller('myCtrl', function ($scope, $mdToast, $log, $mdDialog, $element) 
 
 
                                                             const dateColumnIndex = findDateColumnIndex(headerRow);
-                                                            console.log(dateColumnIndex); // 
+                                                           /// console.log(dateColumnIndex); // 
 
                                                             if (dateColumnIndex === -1) {
-                                                                console.error("Date column not found in the data.");
+                                                                //console.error("Date column not found in the data.");
                                                                 return dataArray; // Return the original array if the "DATE" column is not found
                                                             }
 
