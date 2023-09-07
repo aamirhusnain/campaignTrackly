@@ -539,8 +539,8 @@ app.controller('myCtrl', function ($scope, $mdToast, $log, $mdDialog, $element) 
                   
                     $mdDialog.show({
                         scope: $scope.$new(),
-                      // templateUrl: '/Templates/SheetConfirm.html',
-                         templateUrl: '/campaignTrackly/CampaignTracklyWeb/Templates/SheetConfirm.html',
+                      //  templateUrl: '/Templates/SheetConfirm.html',
+                       templateUrl: '/campaignTrackly/CampaignTracklyWeb/Templates/SheetConfirm.html',
                         parent: angular.element(document.body),
                         targetEvent: ev,
                         clickOutsideToClose: false,
@@ -1352,10 +1352,20 @@ app.controller('myCtrl', function ($scope, $mdToast, $log, $mdDialog, $element) 
 
                                                 const headerList = replaceMultipleSpacesInArray(headerListLow);
 
+                                                //console.log(headerList);
+                                                //console.log(AllCustoms);
+
+                                                var isCustom = false;
+                                                AllCustoms.forEach(function (item1) {
+                                                    if (headerList.includes(item1)) {
+                                                        isCustom = true;
+                                                        return; // Agar match mil gaya to loop ko break karein
+                                                    }
+                                                });
 
                                                 //////////////////////// Check Scenario ////////////////////////
 
-                                                if (headerList.includes("campaign name") && headerList.includes("url") && !headerList.includes('') && !headerList.includes("content") && !headerList.includes("term") && !headerList.includes("source") && !headerList.includes("medium")) {
+                                                if (headerList.includes("campaign name") && headerList.includes("url") && !headerList.includes('') && !headerList.includes("content") && !headerList.includes("term") && !headerList.includes("source") && !headerList.includes("medium") && isCustom == false) {
 
                                                     Scenario = "First Scenario";
 
