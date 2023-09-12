@@ -181,6 +181,7 @@ app.controller('myCtrl', function ($scope, $mdToast, $log, $mdDialog, $element) 
 
 
 
+                window.localStorage.removeItem("LastAddress");
 
                 function LoadSetting() {
 
@@ -212,7 +213,6 @@ app.controller('myCtrl', function ($scope, $mdToast, $log, $mdDialog, $element) 
                                             var newSheet = worksheets.add(newSheetName);
 
                                             newSheet.getRange().clear();
-                                            window.localStorage.removeItem("LastAddress");
 
                                             return context.sync()
                                                 .then(function () {
@@ -237,7 +237,21 @@ app.controller('myCtrl', function ($scope, $mdToast, $log, $mdDialog, $element) 
                         },
                         error: function (error) {
                             // Handle the error response here
-                            console.log(error);
+                            if (error.status != 200 && error.status != 500) {
+                                if (error.responseJSON.statusCode === 403 && error.responseJSON.message === "Expired token") {
+                                    RefreshToken(getFromLocal.refresh_token);
+                                    ProgressLinearActive();
+                                    LoadSetting();
+                                }
+                                else {
+                                    loadToast("Connection Issue. Please contact support@campaigntrackly.com");
+                                };
+                            } else {
+                                loadToast("Connection Issue. Please contact support@campaigntrackly.com");
+
+                            }
+
+                            ProgressLinearInActive();;
 
                         }
                     });
@@ -272,24 +286,6 @@ app.controller('myCtrl', function ($scope, $mdToast, $log, $mdDialog, $element) 
                     };
 
 
-                    //AllCustoms.forEach(Cus => {
-                    //    if (Cus == $scope.SelectedOption.custom[i].title) {
-                    //        for (var j = 0; j < $scope.SelectedOption.custom[i].values.length; j++) {
-                    //            var eachTag = [];
-                    //            eachTag.push($scope.SelectedOption.custom[i].values[j].value);
-                    //            AllCustomValues.push(eachTag);
-                    //            eachTag = [];
-                    //        };
-                    //    }
-
-
-                    //})
-
-
-
-
-
-
                     function searchData(jsonArray, searchParams) {
                         return jsonArray.filter(item => searchParams.includes(item.custom));
                     }
@@ -298,12 +294,6 @@ app.controller('myCtrl', function ($scope, $mdToast, $log, $mdDialog, $element) 
                    // console.log(searchResults);
 
                     AllCustomValues = searchResults;
-                    //console.log(AllCustoms);
-                    //console.log(AllCustomValues);
-
-
-
-                   // AllCustomValues = $scope.SelectedOption.custom;
 
 
                     setData(searchResults);
@@ -336,9 +326,6 @@ app.controller('myCtrl', function ($scope, $mdToast, $log, $mdDialog, $element) 
 
                             var OldCustom = window.localStorage.getItem("LastAddress");
 
-
-
-
                             if (OldCustom != null) {
                                 const modifiedString = OldCustom.replace(/\d+$/, "200");
 
@@ -366,32 +353,21 @@ app.controller('myCtrl', function ($scope, $mdToast, $log, $mdDialog, $element) 
                                         }
                                     }
 
-                                    var StartFrom = getAlphabeticCharacter(UsedColumn.length + 1);
-                                    var EndTo = getAlphabeticCharacter(UsedColumn.length + data.length);
-
-                                    //console.log(StartFrom);
-                                    //console.log(EndTo);
-                                    //console.log(data);
-
-                                    //const DataForSet = [];
-
-                                    //data.forEach(item => {
-                                    //    DataForSet.push([item]);
-                                    //});
-
-                                    window.localStorage.setItem("LastAddress", StartFrom + 1 + ":" + EndTo + 1);
-
-                                    var Address = sheet.getRange(StartFrom + 1 + ":" + EndTo + 1);
-                                    Address.values = [data];
-
-
+                                    if (data.length > 0) {
+                                        var StartFrom = getAlphabeticCharacter(UsedColumn.length + 1);
+                                        var EndTo = getAlphabeticCharacter(UsedColumn.length + data.length);
+                                        window.localStorage.setItem("LastAddress", StartFrom + 1 + ":" + EndTo + 1);
+                                        var Address = sheet.getRange(StartFrom + 1 + ":" + EndTo + 1);
+                                        Address.values = [data];
+                                    } else {
+                                        window.localStorage.removeItem("LastAddress");
+                                    }
+                                    
                                  
                                     for (var i = 0; i < AllCustoms.length; i++) {
 
-                                    //    let index = AllCustoms.indexOf(text);
 
                                         var StartDropdown = getAlphabeticCharacter(UsedColumn.length + 1 + i) + "1";
-
 
                                         var lengthOfCusArr = AllCustomValues[i].values.length;
                                         let updatedAddress = StartDropdown.replace(/\d+$/, 2);
@@ -521,26 +497,13 @@ app.controller('myCtrl', function ($scope, $mdToast, $log, $mdDialog, $element) 
                 //    console.error(error);
                 //});
 
-
-
-
-
-
-
-               
-
-                
-
-
-
-
                 $scope.OpenDialog = function (ev) {
                  
                   
                     $mdDialog.show({
                         scope: $scope.$new(),
                       //  templateUrl: '/Templates/SheetConfirm.html',
-                       templateUrl: '/campaignTrackly/CampaignTracklyWeb/Templates/SheetConfirm.html',
+                      templateUrl: '/campaignTrackly/CampaignTracklyWeb/Templates/SheetConfirm.html',
                         parent: angular.element(document.body),
                         targetEvent: ev,
                         clickOutsideToClose: false,
@@ -829,7 +792,23 @@ app.controller('myCtrl', function ($scope, $mdToast, $log, $mdDialog, $element) 
                         },
                         error: function (error) {
                             //  console.error('Error:', error);
+
+
+                            if (error.responseJSON) {
+                                if (error.responseJSON.statusCode === 403 && error.responseJSON.message === "Expired token") {
+                                    RefreshToken(getFromLocal.refresh_token);
+                                    if (tokenFreshed) {
+                                        $scope.getTagTemplates();
+                                    };
+                                } else {
+                                    loadToast("Connection Issue. Please contact support@campaigntrackly.com");
+                                }
+                            } else {
+                                loadToast("Connection Issue. Please contact support@campaigntrackly.com");
+                            }
+
                             ProgressLinearInActive();
+
                         }
                     });
                 };
@@ -1237,8 +1216,19 @@ app.controller('myCtrl', function ($scope, $mdToast, $log, $mdDialog, $element) 
                                 resolve(response);
                             },
                             error: function (error) {
-                             //   console.log(error);
-                                reject(error);
+                                if (error.status != 200 && error.status != 500) {
+                                    if (error.responseJSON.statusCode === 403 && error.responseJSON.message === "Expired token") {
+                                        RefreshToken(getFromLocal.refresh_token);
+                                        ProgressLinearActive();
+                                        $scope.ApplyTemplate();
+                                    }
+                                    else {
+                                        loadToast("Connection Issue. Please contact support@campaigntrackly.com");
+                                    };
+                                } else {
+                                    loadToast("Connection Issue. Please contact support@campaigntrackly.com");
+
+                                }
                                 ProgressLinearInActive();
                             }
                         });
@@ -1266,6 +1256,8 @@ app.controller('myCtrl', function ($scope, $mdToast, $log, $mdDialog, $element) 
                 function closeDialog() {
                     $mdDialog.hide();
                 };
+
+
 
                 $scope.ApplyTemplate = async function () {
                     try {
@@ -1317,7 +1309,9 @@ app.controller('myCtrl', function ($scope, $mdToast, $log, $mdDialog, $element) 
 
                                                 allData = DataResults.values;
 
-                                                // console.log(allData);
+                                                console.log(allData);
+
+
 
                                                 if (allData[0][0] === '') {
                                                     ProgressLinearInActive();
@@ -1336,6 +1330,62 @@ app.controller('myCtrl', function ($scope, $mdToast, $log, $mdDialog, $element) 
                                                 };
 
 
+
+                                                function isColumnEmpty(columnIndex) {
+                                                    for (var i = 1; i < $scope.UsedSheetValues.length; i++) {
+                                                        if ($scope.UsedSheetValues[i][columnIndex] !== "") {
+                                                            return false;
+                                                        }
+                                                    }
+                                                    return true;
+                                                }
+
+                                                // Find and store indices of columns with all empty values
+                                                var emptyColumnIndices = [];
+                                                for (var j = 0; j < $scope.UsedSheetValues[0].length; j++) {
+                                                    if (isColumnEmpty(j)) {
+                                                        emptyColumnIndices.push(j);
+                                                    }
+                                                }
+
+                                                // Remove columns with all empty values from right to left to avoid index issues
+                                                for (var k = emptyColumnIndices.length - 1; k >= 0; k--) {
+                                                    var columnIndex = emptyColumnIndices[k];
+                                                    for (var l = 0; l < $scope.UsedSheetValues.length; l++) {
+                                                        $scope.UsedSheetValues[l].splice(columnIndex, 1);
+                                                    }
+                                                }
+
+                                                // Now, the data array no longer contains columns with all empty values
+                                                console.log($scope.UsedSheetValues);
+
+                                                //console.log($scope.UsedSheetValues);
+
+
+
+
+                                                var isEmptyValueFound = false;
+
+                                                for (var i = 1; i < $scope.UsedSheetValues.length; i++) {
+                                                    var row = $scope.UsedSheetValues[i];
+                                                    for (var j = 0; j < AllCustoms.length; j++) {
+                                                        var header = AllCustoms[j];
+                                                        var value = row[$scope.UsedSheetValues[0].indexOf(header)];
+                                                        if (value === "") {
+                                                            isEmptyValueFound = true; 
+                                                        }
+                                                    }
+                                                    if (isEmptyValueFound) {
+                                                        break; 
+                                                    }
+                                                }
+
+                                         
+
+
+
+
+
                                                 var lowerCaseHeadArr = $scope.UsedSheetValues[0];
 
                                                 var headerListLow = lowerCaseHeadArr.map(item => item.toLowerCase());
@@ -1352,22 +1402,29 @@ app.controller('myCtrl', function ($scope, $mdToast, $log, $mdDialog, $element) 
 
                                                 const headerList = replaceMultipleSpacesInArray(headerListLow);
 
-                                                //console.log(headerList);
-                                                //console.log(AllCustoms);
 
                                                 var isCustom = false;
-                                                AllCustoms.forEach(function (item1) {
-                                                    if (headerList.includes(item1)) {
-                                                        isCustom = true;
-                                                        return; // Agar match mil gaya to loop ko break karein
-                                                    }
-                                                });
+
+                                               
+                                                if (isEmptyValueFound == false) {
+                                                    AllCustoms.forEach(function (item1, index) {
+                                                        if (headerList.includes(item1)) {
+                                                            isCustom = true;
+                                                            //const indexOfMatch = headerList.indexOf(item1);
+                                                            //console.log(indexOfMatch);
+                                                            return;
+                                                        }
+                                                    });
+                                                };
+                                               
+
 
                                                 //////////////////////// Check Scenario ////////////////////////
 
                                                 if (headerList.includes("campaign name") && headerList.includes("url") && !headerList.includes('') && !headerList.includes("content") && !headerList.includes("term") && !headerList.includes("source") && !headerList.includes("medium") && isCustom == false) {
 
                                                     Scenario = "First Scenario";
+                                                   
 
                                                     for (let i = 0; i < headerList.length; i++) {
 
@@ -1383,6 +1440,45 @@ app.controller('myCtrl', function ($scope, $mdToast, $log, $mdDialog, $element) 
                                                 else {
                                                     Scenario = "Secound Scenario";
 
+
+
+
+
+                                                    //// Initialize an array to store the indices of empty columns
+                                                    //var emptyColumnIndices = [];
+
+                                                    //// Loop through the data array
+                                                    //for (var i = 1; i < $scope.UsedSheetValues.length; i++) {
+                                                    //    var row = $scope.UsedSheetValues[i];
+                                                    //    for (var j = 0; j < AllCustoms.length; j++) {
+                                                    //        var header = AllCustoms[j];
+                                                    //        var value = row[$scope.UsedSheetValues[0].indexOf(header)];
+                                                    //        if (value === "") {
+                                                    //            isEmptyValueFound = true;
+                                                    //        }
+                                                    //    }
+                                                    //    if (isEmptyValueFound) {
+                                                    //        emptyColumnIndices.push(i); // Add the index of the empty column
+                                                    //        isEmptyValueFound = false; // Reset the flag for the next column
+                                                    //    }
+                                                    //}
+
+                                                    //// Remove the empty columns from the data array
+                                                    //for (var i = emptyColumnIndices.length - 1; i >= 0; i--) {
+                                                    //    var columnIndex = emptyColumnIndices[i];
+                                                    //    for (var j = 0; j < $scope.UsedSheetValues.length; j++) {
+                                                    //        $scope.UsedSheetValues[j].splice(columnIndex, 1); // Remove the column at the specified index
+                                                    //    }
+                                                    //}
+
+                                                    //console.log($scope.UsedSheetValues)
+
+
+                                                    // Function to check if all values in a column are empty
+                                                    
+
+
+                                           
                                                     OtherTags = [];
 
 
@@ -1422,14 +1518,14 @@ app.controller('myCtrl', function ($scope, $mdToast, $log, $mdDialog, $element) 
                                                             indxOfSource = i;
                                                         } else {
                                                             // if (headerList[i] != "result" && headerList[i] != "short links" && headerList[i] != "date") {
-                                                        //    if (CustomTagAPI.includes(headerList[i])) {
+                                                          if (CustomTagAPI.includes(headerList[i])) {
                                                                 var CustomTagObj = {
                                                                     "TagName": headerList[i],
                                                                     "TagIndex": i
                                                                 };
                                                                 OtherTags.push(CustomTagObj);
                                                                 CustomTagObj = {};
-                                                           // };
+                                                            };
 
                                                         };
                                                     };
@@ -1462,6 +1558,7 @@ app.controller('myCtrl', function ($scope, $mdToast, $log, $mdDialog, $element) 
                                                         PrepareDataApplyTemplate = {};
                                                     };
 
+                                                  
 
                                                     $.ajax({
                                                         url: BaseURL + "/wp-json/campaigntrackly/v1/apply_template",
@@ -1477,7 +1574,7 @@ app.controller('myCtrl', function ($scope, $mdToast, $log, $mdDialog, $element) 
 
                                                             if (response.code) {
                                                                 if (response.code === "401") {
-                                                                    ProgressLinearInActive();;
+                                                                    ProgressLinearInActive();
                                                                     loadToast(response.response);
 
                                                                 };
@@ -1499,8 +1596,8 @@ app.controller('myCtrl', function ($scope, $mdToast, $log, $mdDialog, $element) 
 
 
                                                                 };
-                                                                console.log(dateIndexs);
-                                                                console.log($scope.UsedSheetValues);
+                                                                //console.log(dateIndexs);
+                                                                //console.log($scope.UsedSheetValues);
 
 
 
@@ -1553,10 +1650,10 @@ app.controller('myCtrl', function ($scope, $mdToast, $log, $mdDialog, $element) 
 
 
                                                                     const dateColumnIndex = findDateColumnIndex(headerRow);
-                                                                    console.log(dateColumnIndex); // 
+                                                                    //console.log(dateColumnIndex); // 
 
                                                                     if (dateColumnIndex === -1) {
-                                                                        console.error("Date column not found in the data.");
+                                                                  //      console.error("Date column not found in the data.");
                                                                         return dataArray; // Return the original array if the "DATE" column is not found
                                                                     }
 
@@ -2023,6 +2120,7 @@ app.controller('myCtrl', function ($scope, $mdToast, $log, $mdDialog, $element) 
                                                         PrepareFinalArr.push(PrepareDataApplyTemplate);
                                                         PrepareDataApplyTemplate = {};
                                                     };
+                                
 
                                                     //console.log(PrepareFinalArr);
 
@@ -2044,7 +2142,7 @@ app.controller('myCtrl', function ($scope, $mdToast, $log, $mdDialog, $element) 
 
                                                         if (result.code) {
                                                             if (result.code === "401") {
-                                                                ProgressLinearInActive();;
+                                                                ProgressLinearInActive();
                                                                 loadToast(result.response);
 
                                                             };
