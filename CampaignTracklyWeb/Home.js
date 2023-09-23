@@ -49,8 +49,8 @@ app.controller('myCtrl', function ($scope, $mdToast, $log, $mdDialog, $element) 
         };
 
 
-      // var BaseURL = "https://devapp.campaigntrackly.com";
-           var BaseURL = "https://app.campaigntrackly.com";
+       var BaseURL = "https://devapp.campaigntrackly.com";
+        //   var BaseURL = "https://app.campaigntrackly.com";
 
         /////////// show the started screen to user ///////////
         var checkUser = window.localStorage.getItem("UserVisted");
@@ -61,7 +61,6 @@ app.controller('myCtrl', function ($scope, $mdToast, $log, $mdDialog, $element) 
             $scope.MainPageDiv = true;
             $scope.NavBarDiv = true;
             FirstTime = true;
-         
         } else {
             $scope.StartedScreen = true;
         };
@@ -122,8 +121,8 @@ app.controller('myCtrl', function ($scope, $mdToast, $log, $mdDialog, $element) 
                     $mdDialog.show({
                         scope: $scope.$new(),
                     //  templateUrl: '/Templates/SheetConfirm.html',
-                    //    templateUrl: '/campaignTrackly/CampaignTracklyWeb/Templates/SheetConfirm.html',
-                        templateUrl: 'https://app.campaigntrackly.com/excel-addin/CampaignTracklyWeb/Templates/SheetConfirm.html',
+                        templateUrl: '/campaignTrackly/CampaignTracklyWeb/Templates/SheetConfirm.html',
+                    //    templateUrl: 'https://app.campaigntrackly.com/excel-addin/CampaignTracklyWeb/Templates/SheetConfirm.html',
                         parent: angular.element(document.body),
                         targetEvent: ev,
                         clickOutsideToClose: false,
