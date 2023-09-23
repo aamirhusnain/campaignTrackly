@@ -49,8 +49,8 @@ app.controller('myCtrl', function ($scope, $mdToast, $log, $mdDialog, $element) 
         };
 
 
-       var BaseURL = "https://devapp.campaigntrackly.com";
-       //    var BaseURL = "https://app.campaigntrackly.com";
+      // var BaseURL = "https://devapp.campaigntrackly.com";
+           var BaseURL = "https://app.campaigntrackly.com";
 
         /////////// show the started screen to user ///////////
         var checkUser = window.localStorage.getItem("UserVisted");
@@ -87,41 +87,7 @@ app.controller('myCtrl', function ($scope, $mdToast, $log, $mdDialog, $element) 
 
 
 
-        //$scope.downloadImage = async function (url, fileName) {
-        //    ProgressLinearActive();
-        //    // Create a fetch request for the image.
-        //    const request = new Request(url);
-
-        //    // Make the request and get the response.
-        //    const response = await fetch(request);
-
-        //    // Check if the response is successful.
-        //    if (response.ok) {
-        //        // Create a Blob object from the response.
-        //        const blob = await response.blob();
-
-        //        // Create a URL for the Blob object.
-        //        const blobUrl = window.URL.createObjectURL(blob);
-
-        //        // Create an anchor element and set its href to the Blob URL.
-        //        const anchor = document.createElement('a');
-        //        anchor.href = blobUrl;
-        //        anchor.download = fileName;
-
-        //        // Click the anchor element to download the image.
-        //        anchor.click();
-        //        ProgressLinearInActive();
-        //    }
-        //}
-
-
       
-
-
-
-
-
-
 
         function endGptLoader() {
             document.getElementById("loaderGpt").style.display = 'none';
@@ -150,73 +116,19 @@ app.controller('myCtrl', function ($scope, $mdToast, $log, $mdDialog, $element) 
             try {
 
 
-
-                //$scope.UsedRange = function () {
-
-
-                //    Excel.run(function (context) {
-                //        var sheet = context.workbook.worksheets.getActiveWorksheet();
-                //        var usedRange = sheet.getUsedRange();
-
-                //        usedRange.load("address");
-                //        return context.sync().then(function () {
-
-                //            console.log("Used Range Address: " + usedRange.address);
-
-                //        })
-
-                //        // Now you can work with the 'usedRange' object as needed
-
-                //    }).catch(function (error) {
-                //        console.error("Error:", error);
-                //    });
-                //};
-
-
-
-
-
-
-
-
-
-                //Excel.run(async (context) => {
-                //    let sheet = context.workbook.worksheets.getActiveWorksheet();
-
-                //    let usedRange = sheet.getUsedRange();
-                //    usedRange.load("address");
-
-
-
-                //    return context.sync().then(function () {
-                        
-                //        let cellAddress = usedRange.address;
-                //   //     let addressWithoutSheet = cellAddress.split("!")[1];
-                //   //   console.log(addressWithoutSheet);
-
-
-
-
-
-                //    });
-                //}).catch((error) => {
-                //    console.error(error);
-                //});
-
                 $scope.OpenDialog = function (ev) {
                  
                   
                     $mdDialog.show({
                         scope: $scope.$new(),
                     //  templateUrl: '/Templates/SheetConfirm.html',
-                        templateUrl: '/campaignTrackly/CampaignTracklyWeb/Templates/SheetConfirm.html',
+                    //    templateUrl: '/campaignTrackly/CampaignTracklyWeb/Templates/SheetConfirm.html',
+                        templateUrl: 'https://app.campaigntrackly.com/excel-addin/CampaignTracklyWeb/Templates/SheetConfirm.html',
                         parent: angular.element(document.body),
                         targetEvent: ev,
                         clickOutsideToClose: false,
                         escapeToClose: false,
                         controller: ['$scope', '$mdDialog', function ($scope, $mdDialog) {
-
-
 
                         }]
                     });
@@ -590,8 +502,8 @@ app.controller('myCtrl', function ($scope, $mdToast, $log, $mdDialog, $element) 
 
                 /////////// check token expiration ///////////
                 function isTokenExpired(token) {
-                    const base64Url = token.split(".")[1];
-                    const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+                   // const base64Url = token.split(".")[1];
+                    const base64 = token;
                     const jsonPayload = decodeURIComponent(
                         atob(base64)
                             .split("")
@@ -1340,7 +1252,7 @@ app.controller('myCtrl', function ($scope, $mdToast, $log, $mdDialog, $element) 
 
                                                 allData = DataResults.values;
 
-                                                console.log(allData);
+                                               // console.log(allData);
 
 
 
@@ -1389,9 +1301,9 @@ app.controller('myCtrl', function ($scope, $mdToast, $log, $mdDialog, $element) 
 
                                                 // Now, the data array no longer contains columns with all empty values
 
-                                                console.log($scope.UsedSheetValues);
-                                                console.log($scope.UsedSheetValues[0]);
-                                                console.log(AllCustoms);
+                                                //console.log($scope.UsedSheetValues);
+                                                //console.log($scope.UsedSheetValues[0]);
+                                                //console.log(AllCustoms);
 
 
 
@@ -1435,16 +1347,30 @@ app.controller('myCtrl', function ($scope, $mdToast, $log, $mdDialog, $element) 
                                                 var isCustom = false;
 
                                                
+                                                //if (isEmptyValueFound == false) {
+                                                //    AllCustoms.forEach(function (item1, index) {
+                                                //        if (headerList.includes(item1)) {
+                                                //            isCustom = true;
+                                                //            //const indexOfMatch = headerList.indexOf(item1);
+                                                //            //console.log(indexOfMatch);
+                                                //            return;
+                                                //        }
+                                                //    });
+                                                //};
+
                                                 if (isEmptyValueFound == false) {
                                                     AllCustoms.forEach(function (item1, index) {
-                                                        if (headerList.includes(item1)) {
+                                                        // Convert item1 and headerList items to lowercase (you can also use toUpperCase)
+                                                        const lowerCaseItem1 = item1.toLowerCase();
+                                                      //  const lowerCaseHeaderList = headerList.map(item => item.toLowerCase());
+
+                                                        if (headerList.includes(lowerCaseItem1)) {
                                                             isCustom = true;
-                                                            //const indexOfMatch = headerList.indexOf(item1);
-                                                            //console.log(indexOfMatch);
                                                             return;
                                                         }
                                                     });
-                                                };
+                                                }
+
                                                
 
 
@@ -2316,8 +2242,8 @@ app.controller('myCtrl', function ($scope, $mdToast, $log, $mdDialog, $element) 
                                                                 };
 
 
-                                                                console.log(FinalSheetSet);
-                                                                console.log(UrlItem);
+                                                                //console.log(FinalSheetSet);
+                                                                //console.log(UrlItem);
 
 
                                                                 Excel.run(function (context) {
