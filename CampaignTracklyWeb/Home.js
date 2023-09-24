@@ -500,32 +500,15 @@ app.controller('myCtrl', function ($scope, $mdToast, $log, $mdDialog, $element) 
               
 
                 /////////// check token expiration ///////////
-                function isTokenExpired(token) {
-                   // const base64Url = token.split(".")[1];
-                    const base64 = token;
-                    const jsonPayload = decodeURIComponent(
-                        atob(base64)
-                            .split("")
-                            .map(function (c) {
-                                return "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2);
-                            })
-                            .join("")
-                    );
+                
+             function isTokenExpired(token) {
+            const payload = JSON.parse(atob(token.split('.')[1]));
+            const expirationTimestamp = payload.exp * 1000;  // Convert to milliseconds
 
-                    const { exp } = JSON.parse(jsonPayload);
-                    var expnew = exp * 1000;
+            const currentTimestamp = Date.now();  // Current timestamp in milliseconds
 
-                    var ee = new Date(Date.now());
-                    var ef = new Date(expnew);
-                    if (ee > ef) {
-                        expired = true;
-                    }
-                    else {
-                        expired = false;
-                    };
-
-                    return expired
-                };
+            return expirationTimestamp <= currentTimestamp;
+        }
 
                 var tokenFreshed;
 
