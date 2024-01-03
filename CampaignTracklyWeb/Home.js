@@ -1,4 +1,4 @@
-﻿var app = angular.module('myApp', ['ngMaterial'], function ($mdThemingProvider) {
+var app = angular.module('myApp', ['ngMaterial'], function ($mdThemingProvider) {
 
     $mdThemingProvider.theme('default')
         .primaryPalette('green', {
@@ -720,6 +720,7 @@ app.controller('myCtrl', function ($scope, $mdToast, $log, $mdDialog, $element) 
                                             return context.sync()
                                                 .then(function () {
                                                     loadExistingCampaigns();
+                                                    checkSetings();
 
                                                 });
                                         } else {
@@ -729,6 +730,7 @@ app.controller('myCtrl', function ($scope, $mdToast, $log, $mdDialog, $element) 
                                             var SettingSheet = context.workbook.worksheets.getItem(newSheetName);
                                             SettingSheet.getRange("B:AZ").clear();
                                             loadExistingCampaigns();
+                                            checkSetings();
                                         };
 
                                     });
@@ -877,7 +879,7 @@ app.controller('myCtrl', function ($scope, $mdToast, $log, $mdDialog, $element) 
 
 
 
-                checkSetings();
+                
 
                 async function setCampaigns(existingCampaigns) {
                     await Excel.run(async (context) => {
