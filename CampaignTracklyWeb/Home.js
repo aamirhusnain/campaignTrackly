@@ -52,7 +52,7 @@ app.controller('myCtrl', function ($scope, $mdToast, $log, $mdDialog, $element) 
 
 
         var BaseURL = "https://devapp.campaigntrackly.com";
-        //  var BaseURL = "https://app.campaigntrackly.com";
+        //    var BaseURL = "https://app.campaigntrackly.com";
 
         /////////// show the started screen to user ///////////
         var checkUser = window.localStorage.getItem("UserVisted");
@@ -68,12 +68,19 @@ app.controller('myCtrl', function ($scope, $mdToast, $log, $mdDialog, $element) 
             $scope.StartedScreen = true;
         };
 
+
+
         $scope.StartAddin = function () {
             window.localStorage.setItem("UserVisted", "Visted");
             $scope.StartedScreen = true;
             $scope.LoginDiv = false;
         };
 
+
+        $scope.goToPlaylist = function () {
+            window.open('https://youtube.com/playlist?list=PLK9s3o7S-dOf_NDebrNVG2jLHSXDWhp-D&si=gjzhM0a\_p--h2Rk8', '_blank');
+
+        };
 
 
         $scope.gptBtn = false;
@@ -157,7 +164,7 @@ app.controller('myCtrl', function ($scope, $mdToast, $log, $mdDialog, $element) 
                         console.error(error);
                     });
                 };
-                
+
                 async function setNameColumnDropdown() {
                     await Excel.run(async function (context) {
                         let sheet = context.workbook.worksheets.getActiveWorksheet();
@@ -179,14 +186,14 @@ app.controller('myCtrl', function ($scope, $mdToast, $log, $mdDialog, $element) 
                     });
                 };
 
-                
+
                 $scope.OpenDialog = function (ev) {
 
                     $mdDialog.show({
                         scope: $scope.$new(),
-                     //       templateUrl: '/Templates/SheetConfirm.html',
-                        templateUrl: '/campaignTrackly/CampaignTracklyWeb/Templates/SheetConfirm.html',
-                        //     templateUrl: 'https://app.campaigntrackly.com/excel-addin/CampaignTracklyWeb/Templates/SheetConfirm.html',
+                        templateUrl: '/Templates/SheetConfirm.html',
+                        //      templateUrl: '/campaignTrackly/CampaignTracklyWeb/Templates/SheetConfirm.html',
+                        //        templateUrl: 'https://app.campaigntrackly.com/excel-addin/CampaignTracklyWeb/Templates/SheetConfirm.html',
                         parent: angular.element(document.body),
                         targetEvent: ev,
                         clickOutsideToClose: false,
@@ -442,7 +449,7 @@ app.controller('myCtrl', function ($scope, $mdToast, $log, $mdDialog, $element) 
 
 
                 $scope.handleOnChange = function (eventArgs) {
-                    
+
                     var address = eventArgs.address;
 
                     if (address === "A1" && eventArgs.details.valueAfter === "Campaign Name") {
@@ -815,7 +822,7 @@ app.controller('myCtrl', function ($scope, $mdToast, $log, $mdDialog, $element) 
                         };
 
                         ProgressLinearInActive();
-                    
+
                     });
 
                 };
@@ -867,7 +874,7 @@ app.controller('myCtrl', function ($scope, $mdToast, $log, $mdDialog, $element) 
 
                             ProgressLinearInActive();
 
-                        
+
                         }
                     });
 
@@ -879,7 +886,7 @@ app.controller('myCtrl', function ($scope, $mdToast, $log, $mdDialog, $element) 
 
 
 
-                
+
 
                 async function setCampaigns(existingCampaigns) {
                     await Excel.run(async (context) => {
@@ -1577,7 +1584,7 @@ app.controller('myCtrl', function ($scope, $mdToast, $log, $mdDialog, $element) 
                                                     }
                                                 }
 
-                                      
+
 
                                                 var checkRequiredTagVal = true;
 
@@ -1585,21 +1592,71 @@ app.controller('myCtrl', function ($scope, $mdToast, $log, $mdDialog, $element) 
                                                 var isEmptyValueFound = false;
 
 
-                                                for (var i = 1; i < $scope.UsedSheetValues.length; i++) {
-                                                    var row = $scope.UsedSheetValues[i];
-                                                    for (var j = 0; j < AllCustoms.length; j++) {
-                                                        var header = AllCustoms[j];
-                                                        var value = row[$scope.UsedSheetValues[0].indexOf(header)];
-                                                        if (value === "") {
-                                                            isEmptyValueFound = true;
+
+
+                                                function checkValues(usedSheetValues, allCustoms, requiredCustomTags) {
+                                                  
+                                                    for (let i = 1; i < usedSheetValues.length; i++) {
+                                                        const row = usedSheetValues[i];
+                                                        for (let j = 0; j < allCustoms.length; j++) {
+                                                            const header = allCustoms[j];
+
+                                                            const requiredTag = requiredCustomTags.find(tag => tag.name === header);
+                                                            if (requiredTag) {
+                                                                const columnIndex = usedSheetValues[0].indexOf(header);
+                                                                const value = row[columnIndex];
+                                                                if (value === "") {
+                                                                    isEmptyValueFound = true;
+                                                                    break;
+                                                                }
+                                                            }
+                                                        }
+                                                        if (isEmptyValueFound) {
+                                                            break;
                                                         }
                                                     }
-                                                    if (isEmptyValueFound) {
-                                                        break;
-                                                    }
+
+                                                    return isEmptyValueFound;
                                                 };
 
+
+                                                if (isSetting) {
+                                                    checkValues($scope.UsedSheetValues, AllCustoms, requiredCusTags);
+
+
+                                                } else {
+
+
+                                                    
+
+                                                    for (var j = 0; j < AllCustoms.length; j++) {
+                                                        var header = AllCustoms[j];
+                                                        isEmptyValueFound = false; // Reset for each column
+                                                        for (var i = 1; i < $scope.UsedSheetValues.length; i++) {
+                                                            var row = $scope.UsedSheetValues[i];
+                                                            var value = row[$scope.UsedSheetValues[0].indexOf(header)];
+                                                            if (value === "") {
+                                                                isEmptyValueFound = true;
+                                                                break; 
+                                                            }
+                                                        }
+                                                        if (!isEmptyValueFound) {
+                                                            break;
+                                                        }
+                                                    }
+
+                                                };
+
+
+
+
+
+
+                                                //console.log(requiredCusTags);
+                                                //console.log(isEmptyValueFound);
+
                                                 //console.log($scope.UsedSheetValues);
+                                                //console.log(AllCustoms);
 
 
 
@@ -1614,7 +1671,7 @@ app.controller('myCtrl', function ($scope, $mdToast, $log, $mdDialog, $element) 
                                                         }
                                                     });
 
-                                                     missingValues = [];
+                                                    missingValues = [];
 
                                                     customTagNames.forEach((tag) => {
                                                         const columnIndex = tagMap[tag.id];
@@ -1657,15 +1714,15 @@ app.controller('myCtrl', function ($scope, $mdToast, $log, $mdDialog, $element) 
 
 
                                                 if (isSetting) {
-                                                     mappedTagsToColumns = mapCustomTagsToColumns(requiredCusTags, $scope.UsedSheetValues);
-                                                 //   console.log(mappedTagsToColumns);
+                                                    mappedTagsToColumns = mapCustomTagsToColumns(requiredCusTags, $scope.UsedSheetValues);
+                                                    //   console.log(mappedTagsToColumns);
                                                 } else {
                                                     checkRequiredTagVal = true;
                                                 };
 
 
 
-                                                
+
 
 
                                                 var lowerCaseHeadArr = $scope.UsedSheetValues[0];
@@ -1687,23 +1744,38 @@ app.controller('myCtrl', function ($scope, $mdToast, $log, $mdDialog, $element) 
 
                                                 var isCustom = false;
 
-                                                
 
-                                                if (isEmptyValueFound == false) {
-                                                    AllCustoms.forEach(function (item1, index) {
-                                                        // Convert item1 and headerList items to lowercase (you can also use toUpperCase)
-                                                        const lowerCaseItem1 = item1.toLowerCase();
-                                                        //  const lowerCaseHeaderList = headerList.map(item => item.toLowerCase());
+                                                if (isSetting && isEmptyValueFound === false) {
+                                                    isCustom = true;
 
-                                                        if (headerList.includes(lowerCaseItem1)) {
-                                                            isCustom = true;
-                                                            return;
-                                                        }
-                                                    });
+                                                } else {
+
+
+                                                    if (isEmptyValueFound == false) {
+                                                        AllCustoms.forEach(function (item1, index) {
+                                                            // Convert item1 and headerList items to lowercase (you can also use toUpperCase)
+                                                            const lowerCaseItem1 = item1.toLowerCase();
+                                                            //  const lowerCaseHeaderList = headerList.map(item => item.toLowerCase());
+
+                                                            if (headerList.includes(lowerCaseItem1)) {
+                                                                isCustom = true;
+                                                                return;
+                                                            }
+                                                        });
+                                                    }
+
+
+
+
                                                 }
 
 
-                                                
+                                                console.log(isCustom);
+
+                                                //if (isSetting) {
+                                                //    isCustom = true;
+                                                //};
+
 
 
 
@@ -1831,109 +1903,116 @@ app.controller('myCtrl', function ($scope, $mdToast, $log, $mdDialog, $element) 
                                                                 //   console.log(response);
 
 
-                                                                if (response.code) {
-                                                                    if (response.code === "401") {
-                                                                        ProgressLinearInActive();
-                                                                        loadToast(response.response);
 
-                                                                    };
-                                                                };
-
-                                                                if (response.code != "401") {
+                                                                if (!response[0].hasOwnProperty("existed_links")) {
 
 
 
 
-                                                                    var dateIndexs = [];
-                                                                    var Headers = $scope.UsedSheetValues[0];
 
-                                                                    for (var i = 0; i < Headers.length; i++) {
+                                                                    if (response.code) {
+                                                                        if (response.code === "401") {
+                                                                            ProgressLinearInActive();
+                                                                            loadToast(response.response);
 
-                                                                        if (Headers[i].toLowerCase().includes("date")) {
-                                                                            dateIndexs.push(i);
                                                                         };
-
-
                                                                     };
-                                                                    //console.log(dateIndexs);
-                                                                    //console.log($scope.UsedSheetValues);
+
+                                                                    if (response.code != "401") {
 
 
 
-                                                                    function getJsDateTimeFromExcel(excelDateValue) {
-                                                                        // Convert Excel date to milliseconds since January 1, 1970 (Unix epoch)
-                                                                        const msSinceUnixEpoch = (excelDateValue - (25567 + 2)) * 86400 * 1000;
 
-                                                                        // Create a new JavaScript Date object from milliseconds
-                                                                        const jsDate = new Date(msSinceUnixEpoch);
+                                                                        var dateIndexs = [];
+                                                                        var Headers = $scope.UsedSheetValues[0];
 
-                                                                        // Get the hours in UTC (Coordinated Universal Time)
-                                                                        const hoursInUTC = jsDate.getUTCHours();
+                                                                        for (var i = 0; i < Headers.length; i++) {
 
-                                                                        // Get the minutes
-                                                                        const minutes = jsDate.getMinutes();
+                                                                            if (Headers[i].toLowerCase().includes("date")) {
+                                                                                dateIndexs.push(i);
+                                                                            };
 
-                                                                        // Convert hours to your local time zone (modify the offset as needed)
-                                                                        const timeZoneOffsetInHours = 0; // Replace with your local time zone offset in hours
-                                                                        const hours = (hoursInUTC + timeZoneOffsetInHours) % 24;
 
-                                                                        // Convert hours and minutes to 24-hour format strings
-                                                                        const hoursString = hours < 10 ? `0${hours}` : `${hours}`;
-                                                                        const minutesString = minutes < 10 ? `0${minutes}` : `${minutes}`;
-
-                                                                        // Format the date and time as "MM/DD/YYYY HH:mm" and return the string
-                                                                        return `${jsDate.getMonth() + 1}/${jsDate.getDate()}/${jsDate.getFullYear()} ${hoursString}:${minutesString}`;
-                                                                    }
+                                                                        };
+                                                                        //console.log(dateIndexs);
+                                                                        //console.log($scope.UsedSheetValues);
 
 
 
-                                                                    function findDateColumnIndex(headerRow) {
-                                                                        const dateColumnKeywords = ["DATE", "TIME", "Start Date", "End Date", "Event Date"]; // Add more variations if needed
+                                                                        function getJsDateTimeFromExcel(excelDateValue) {
+                                                                            // Convert Excel date to milliseconds since January 1, 1970 (Unix epoch)
+                                                                            const msSinceUnixEpoch = (excelDateValue - (25567 + 2)) * 86400 * 1000;
 
-                                                                        for (let i = 0; i < headerRow.length; i++) {
-                                                                            const header = headerRow[i].toUpperCase().trim();
-                                                                            if (dateColumnKeywords.some(keyword => header.includes(keyword.toUpperCase()))) {
-                                                                                return i;
+                                                                            // Create a new JavaScript Date object from milliseconds
+                                                                            const jsDate = new Date(msSinceUnixEpoch);
+
+                                                                            // Get the hours in UTC (Coordinated Universal Time)
+                                                                            const hoursInUTC = jsDate.getUTCHours();
+
+                                                                            // Get the minutes
+                                                                            const minutes = jsDate.getMinutes();
+
+                                                                            // Convert hours to your local time zone (modify the offset as needed)
+                                                                            const timeZoneOffsetInHours = 0; // Replace with your local time zone offset in hours
+                                                                            const hours = (hoursInUTC + timeZoneOffsetInHours) % 24;
+
+                                                                            // Convert hours and minutes to 24-hour format strings
+                                                                            const hoursString = hours < 10 ? `0${hours}` : `${hours}`;
+                                                                            const minutesString = minutes < 10 ? `0${minutes}` : `${minutes}`;
+
+                                                                            // Format the date and time as "MM/DD/YYYY HH:mm" and return the string
+                                                                            return `${jsDate.getMonth() + 1}/${jsDate.getDate()}/${jsDate.getFullYear()} ${hoursString}:${minutesString}`;
+                                                                        }
+
+
+
+                                                                        function findDateColumnIndex(headerRow) {
+                                                                            const dateColumnKeywords = ["DATE", "TIME", "Start Date", "End Date", "Event Date"]; // Add more variations if needed
+
+                                                                            for (let i = 0; i < headerRow.length; i++) {
+                                                                                const header = headerRow[i].toUpperCase().trim();
+                                                                                if (dateColumnKeywords.some(keyword => header.includes(keyword.toUpperCase()))) {
+                                                                                    return i;
+                                                                                }
                                                                             }
+
+                                                                            return -1; // Return -1 if the date column is not found
                                                                         }
 
-                                                                        return -1; // Return -1 if the date column is not found
-                                                                    }
+
+                                                                        function convertDateColumnToJSDate(dataArray) {
+                                                                            const headerRow = dataArray[0];
+
+                                                                            // Find the index of the "DATE" column
+                                                                            // const dateColumnIndex = headerRow.findIndex((header) => header === "DATE");
 
 
-                                                                    function convertDateColumnToJSDate(dataArray) {
-                                                                        const headerRow = dataArray[0];
+                                                                            const dateColumnIndex = findDateColumnIndex(headerRow);
+                                                                            //console.log(dateColumnIndex); // 
 
-                                                                        // Find the index of the "DATE" column
-                                                                        // const dateColumnIndex = headerRow.findIndex((header) => header === "DATE");
+                                                                            if (dateColumnIndex === -1) {
+                                                                                //      console.error("Date column not found in the data.");
+                                                                                return dataArray; // Return the original array if the "DATE" column is not found
+                                                                            }
 
+                                                                            // Loop through the array starting from the second row (skipping the header)
+                                                                            for (let i = 1; i < dataArray.length; i++) {
+                                                                                const excelDate = dataArray[i][dateColumnIndex];
 
-                                                                        const dateColumnIndex = findDateColumnIndex(headerRow);
-                                                                        //console.log(dateColumnIndex); // 
+                                                                                // Convert the Excel date to JavaScript Date format
+                                                                                const jsDate = getJsDateTimeFromExcel(excelDate);
 
-                                                                        if (dateColumnIndex === -1) {
-                                                                            //      console.error("Date column not found in the data.");
-                                                                            return dataArray; // Return the original array if the "DATE" column is not found
+                                                                                // Replace the Excel date with the JavaScript Date object in the array
+                                                                                dataArray[i][dateColumnIndex] = jsDate;
+                                                                            }
+
+                                                                            return dataArray;
                                                                         }
 
-                                                                        // Loop through the array starting from the second row (skipping the header)
-                                                                        for (let i = 1; i < dataArray.length; i++) {
-                                                                            const excelDate = dataArray[i][dateColumnIndex];
+                                                                        // Convert the date column to JavaScript Date format
+                                                                        const dataArrayWithJSDate = convertDateColumnToJSDate($scope.UsedSheetValues);
 
-                                                                            // Convert the Excel date to JavaScript Date format
-                                                                            const jsDate = getJsDateTimeFromExcel(excelDate);
-
-                                                                            // Replace the Excel date with the JavaScript Date object in the array
-                                                                            dataArray[i][dateColumnIndex] = jsDate;
-                                                                        }
-
-                                                                        return dataArray;
-                                                                    }
-
-                                                                    // Convert the date column to JavaScript Date format
-                                                                    const dataArrayWithJSDate = convertDateColumnToJSDate($scope.UsedSheetValues);
-
-                                                                    // console.log(dataArrayWithJSDate);
+                                                                        // console.log(dataArrayWithJSDate);
 
 
 
@@ -1941,136 +2020,211 @@ app.controller('myCtrl', function ($scope, $mdToast, $log, $mdDialog, $element) 
 
 
 
-                                                                    $scope.result_Links = response;
+                                                                        $scope.result_Links = response;
 
-                                                                    if ($scope.result_Links[0].links.length > 0) {
+                                                                        if ($scope.result_Links[0].links.length > 0) {
 
-                                                                        FinalSheetSet = [];
-                                                                        var UrlItem = [];
+                                                                            FinalSheetSet = [];
+                                                                            var UrlItem = [];
 
 
-                                                                        for (var i = 0; i < $scope.UsedSheetValues.length;) {
-                                                                            if (i != 0) {
-                                                                                for (var m = 0; m < $scope.result_Links.length; m++) {
-                                                                                    if ($scope.result_Links[m].links.length > 0) {
-                                                                                        for (var n = 0; n < $scope.result_Links[m].links.length; n++) {
+                                                                            for (var i = 0; i < $scope.UsedSheetValues.length;) {
+                                                                                if (i != 0) {
+                                                                                    for (var m = 0; m < $scope.result_Links.length; m++) {
+                                                                                        if ($scope.result_Links[m].links.length > 0) {
+                                                                                            for (var n = 0; n < $scope.result_Links[m].links.length; n++) {
+                                                                                                FinalSheetSet.push($scope.UsedSheetValues[i]);
+                                                                                            };
+                                                                                            i++;
+                                                                                        } else {
                                                                                             FinalSheetSet.push($scope.UsedSheetValues[i]);
                                                                                         };
-                                                                                        i++;
-                                                                                    } else {
-                                                                                        FinalSheetSet.push($scope.UsedSheetValues[i]);
+                                                                                    };
+                                                                                } else {
+                                                                                    FinalSheetSet.push($scope.UsedSheetValues[i]);
+                                                                                    i++
+                                                                                };
+                                                                            };
+
+                                                                            for (var m = 0; m < $scope.result_Links.length; m++) {
+                                                                                if ($scope.result_Links[m].links.length > 0) {
+                                                                                    for (var n = 0; n < $scope.result_Links[m].links.length; n++) {
+                                                                                        UrlItem.push([$scope.result_Links[m].links[n], $scope.result_Links[m].short_links[n], $scope.result_Links[m].date, $scope.result_Links[m].short_links[n] + "/qr"])
+                                                                                    };
+                                                                                } else {
+                                                                                    UrlItem.push(['', '', $scope.result_Links[m].date]);
+                                                                                };
+                                                                            };
+
+                                                                            var lastColName = "";
+                                                                            HeadNames = $scope.UsedSheetValues[0];
+                                                                            var markers = [];
+
+                                                                            for (var n = 0; n < HeadNames.length; n++) {
+                                                                                var Aplhabet = (n + 10).toString(36).toUpperCase();
+                                                                                markers[i] = sheet.getRange(Aplhabet + 1);
+                                                                                markers[i].values = HeadNames[n];
+                                                                                if (n < HeadNames.length) {
+                                                                                    if (HeadNames[n] != "Result" && HeadNames[n] != "Short Links" && HeadNames[n] != "QR Code") {
+                                                                                        lastColName = Aplhabet;
                                                                                     };
                                                                                 };
-                                                                            } else {
-                                                                                FinalSheetSet.push($scope.UsedSheetValues[i]);
-                                                                                i++
                                                                             };
-                                                                        };
-
-                                                                        for (var m = 0; m < $scope.result_Links.length; m++) {
-                                                                            if ($scope.result_Links[m].links.length > 0) {
-                                                                                for (var n = 0; n < $scope.result_Links[m].links.length; n++) {
-                                                                                    UrlItem.push([$scope.result_Links[m].links[n], $scope.result_Links[m].short_links[n], $scope.result_Links[m].date, $scope.result_Links[m].short_links[n] + "/qr"])
-                                                                                };
-                                                                            } else {
-                                                                                UrlItem.push(['', '', $scope.result_Links[m].date]);
-                                                                            };
-                                                                        };
-
-                                                                        var lastColName = "";
-                                                                        HeadNames = $scope.UsedSheetValues[0];
-                                                                        var markers = [];
-
-                                                                        for (var n = 0; n < HeadNames.length; n++) {
-                                                                            var Aplhabet = (n + 10).toString(36).toUpperCase();
-                                                                            markers[i] = sheet.getRange(Aplhabet + 1);
-                                                                            markers[i].values = HeadNames[n];
-                                                                            if (n < HeadNames.length) {
-                                                                                if (HeadNames[n] != "Result" && HeadNames[n] != "Short Links" && HeadNames[n] != "QR Code") {
-                                                                                    lastColName = Aplhabet;
-                                                                                };
-                                                                            };
-                                                                        };
 
 
 
 
 
 
-                                                                        Excel.run(function (context) {
-                                                                            let Actsheet = context.workbook.worksheets.getActiveWorksheet();
-                                                                            Actsheet.load("name");
+                                                                            Excel.run(function (context) {
+                                                                                let Actsheet = context.workbook.worksheets.getActiveWorksheet();
+                                                                                Actsheet.load("name");
 
-                                                                            let sheets = context.workbook.worksheets;
-                                                                            sheets.load("items/name");
+                                                                                let sheets = context.workbook.worksheets;
+                                                                                sheets.load("items/name");
 
-                                                                            return context.sync().then(function () {
+                                                                                return context.sync().then(function () {
 
-                                                                                var checkRes;
-                                                                                for (var i = 0; i < sheets.items.length; i++) {
-                                                                                    ActiveSheet = Actsheet.name;
-                                                                                    ActiveSheet = limitStringLength(ActiveSheet);
-                                                                                    var activeSheetRes = "Result_" + ActiveSheet;
-                                                                                    if (sheets.items[i].name === activeSheetRes) {
-                                                                                        checkRes = true;
-                                                                                        break;
-                                                                                    } else {
-                                                                                        checkRes = false;
+                                                                                    var checkRes;
+                                                                                    for (var i = 0; i < sheets.items.length; i++) {
+                                                                                        ActiveSheet = Actsheet.name;
+                                                                                        ActiveSheet = limitStringLength(ActiveSheet);
+                                                                                        var activeSheetRes = "Result_" + ActiveSheet;
+                                                                                        if (sheets.items[i].name === activeSheetRes) {
+                                                                                            checkRes = true;
+                                                                                            break;
+                                                                                        } else {
+                                                                                            checkRes = false;
+                                                                                        };
                                                                                     };
-                                                                                };
 
 
-                                                                                if (checkRes === true) {
+                                                                                    if (checkRes === true) {
 
-                                                                                    let ResultSheet = context.workbook.worksheets.getItem("Result_" + ActiveSheet);
-                                                                                    ProgressLinearInActive();
-                                                                                    $scope.OpenDialog();
+                                                                                        let ResultSheet = context.workbook.worksheets.getItem("Result_" + ActiveSheet);
+                                                                                        ProgressLinearInActive();
+                                                                                        $scope.OpenDialog();
 
-                                                                                    $scope.SelectMet = function () {
+                                                                                        $scope.SelectMet = function () {
 
-                                                                                        if (Scenario == "First Scenario") {
+                                                                                            if (Scenario == "First Scenario") {
 
-                                                                                            var argsmessage = $scope.$$childTail.selectMethod;
+                                                                                                var argsmessage = $scope.$$childTail.selectMethod;
 
 
-                                                                                            if (argsmessage === 'Replace') {
+                                                                                                if (argsmessage === 'Replace') {
 
-                                                                                                var UsdRangeRes = ResultSheet.getUsedRange();
-                                                                                                context.load(UsdRangeRes);
-                                                                                                UsdRangeRes.clear();
+                                                                                                    var UsdRangeRes = ResultSheet.getUsedRange();
+                                                                                                    context.load(UsdRangeRes);
+                                                                                                    UsdRangeRes.clear();
 
-                                                                                                return context.sync().then(function () {
+                                                                                                    return context.sync().then(function () {
+
+                                                                                                        Excel.run(function (context) {
+
+                                                                                                            var ResultSheet = context.workbook.worksheets.getItem("Result_" + ActiveSheet);
+                                                                                                            return context.sync().then(function () {
+
+                                                                                                                var NextColumnForResult = nextLetter(lastColName);
+                                                                                                                var NextColumnForShort = nextLetter(NextColumnForResult);
+                                                                                                                var NextColumnForDate = nextLetter(NextColumnForShort);
+                                                                                                                var NextColumnForQr = nextLetter(NextColumnForDate);
+                                                                                                                var rangeForResHead = ResultSheet.getRange(NextColumnForResult + 1 + ":" + NextColumnForQr + 1);
+                                                                                                                rangeForResHead.values = [["Result", "Short Links", "Date", "QR Code"]];
+
+                                                                                                                var rangeForDate = sheet.getRange(NextColumnForDate + ":" + NextColumnForDate); // Replace "A:A" with your desired column range
+                                                                                                                rangeForDate.numberFormat = [["[$-409]m/d/yy h:mm AM/PM;@"]];
+
+
+                                                                                                                var toRangeLink = UrlItem.length + 1;
+                                                                                                                var range_Link = NextColumnForResult + 2 + ":" + NextColumnForQr + toRangeLink;
+                                                                                                                var rangeForResLink = ResultSheet.getRange(range_Link);
+
+
+                                                                                                                let data = FinalSheetSet;
+                                                                                                                var FROM = 1;
+                                                                                                                var TO = FROM + data.length - 1;
+                                                                                                                var RANEG = "A" + FROM.toString() + ":" + Aplhabet + TO.toString();
+                                                                                                                let range = ResultSheet.getRange(RANEG);
+                                                                                                                range.formulas = data;
+                                                                                                                range.format.autofitColumns();
+
+                                                                                                                var range_LinksRes = NextColumnForResult + 2 + ":" + NextColumnForResult + toRangeLink;
+                                                                                                                var rangeValOfLinks = ResultSheet.getRange(range_LinksRes);
+
+                                                                                                                rangeValOfLinks.format.wrapText = true;
+                                                                                                                rangeValOfLinks.format.columnWidth = 250;
+
+                                                                                                                ResultSheet.activate();
+
+                                                                                                                return context.sync().then(function () {
+                                                                                                                    rangeForResLink.values = UrlItem;
+                                                                                                                    rangeForResLink.format.autofitColumns();
+                                                                                                                    closeDialog();
+                                                                                                                    ProgressLinearInActive();
+
+                                                                                                                });
+
+
+                                                                                                            });
+
+                                                                                                        });
+                                                                                                    });
+                                                                                                };
+                                                                                                if (argsmessage === 'Merged') {
+
 
                                                                                                     Excel.run(function (context) {
 
                                                                                                         var ResultSheet = context.workbook.worksheets.getItem("Result_" + ActiveSheet);
+                                                                                                        var usedRange = ResultSheet.getUsedRange();
+
+                                                                                                        // Execute the request
+                                                                                                        context.load(usedRange);
                                                                                                         return context.sync().then(function () {
+                                                                                                            var rowCount = usedRange.rowCount;
+
+                                                                                                            var HeadNames = $scope.UsedSheetValues[0];
+                                                                                                            var markers = [];
+                                                                                                            var lastColName;
+                                                                                                            for (var n = 0; n < HeadNames.length; n++) {
+                                                                                                                var Aplhabet = (n + 10).toString(36).toUpperCase();
+                                                                                                                markers[i] = Actsheet.getRange(Aplhabet + 1);
+                                                                                                                markers[i].values = HeadNames[n];
+                                                                                                                if (n < HeadNames.length) {
+                                                                                                                    if (HeadNames[n] != "Result" && HeadNames[n] != "Short Links" && HeadNames[n] != "QR Code") {
+                                                                                                                        lastColName = Aplhabet;
+                                                                                                                    }
+                                                                                                                };
+                                                                                                            };
+
+
 
                                                                                                             var NextColumnForResult = nextLetter(lastColName);
                                                                                                             var NextColumnForShort = nextLetter(NextColumnForResult);
                                                                                                             var NextColumnForDate = nextLetter(NextColumnForShort);
                                                                                                             var NextColumnForQr = nextLetter(NextColumnForDate);
-                                                                                                            var rangeForResHead = ResultSheet.getRange(NextColumnForResult + 1 + ":" + NextColumnForQr + 1);
-                                                                                                            rangeForResHead.values = [["Result", "Short Links", "Date", "QR Code"]];
+
+                                                                                                            var fromRangeLink = rowCount + 1;
+                                                                                                            var toRangeLink = fromRangeLink + UrlItem.length - 1;
+                                                                                                            var range_Link = NextColumnForResult + fromRangeLink + ":" + NextColumnForQr + toRangeLink;
+                                                                                                            var rangeForResLink = ResultSheet.getRange(range_Link);
 
                                                                                                             var rangeForDate = sheet.getRange(NextColumnForDate + ":" + NextColumnForDate); // Replace "A:A" with your desired column range
                                                                                                             rangeForDate.numberFormat = [["[$-409]m/d/yy h:mm AM/PM;@"]];
 
 
-                                                                                                            var toRangeLink = UrlItem.length + 1;
-                                                                                                            var range_Link = NextColumnForResult + 2 + ":" + NextColumnForQr + toRangeLink;
-                                                                                                            var rangeForResLink = ResultSheet.getRange(range_Link);
 
-
+                                                                                                            FinalSheetSet.shift();
                                                                                                             let data = FinalSheetSet;
-                                                                                                            var FROM = 1;
+                                                                                                            var FROM = rowCount + 1;
                                                                                                             var TO = FROM + data.length - 1;
                                                                                                             var RANEG = "A" + FROM.toString() + ":" + Aplhabet + TO.toString();
                                                                                                             let range = ResultSheet.getRange(RANEG);
                                                                                                             range.formulas = data;
                                                                                                             range.format.autofitColumns();
 
-                                                                                                            var range_LinksRes = NextColumnForResult + 2 + ":" + NextColumnForResult + toRangeLink;
+                                                                                                            var range_LinksRes = NextColumnForResult + fromRangeLink + ":" + NextColumnForResult + toRangeLink;
                                                                                                             var rangeValOfLinks = ResultSheet.getRange(range_LinksRes);
 
                                                                                                             rangeValOfLinks.format.wrapText = true;
@@ -2082,170 +2236,103 @@ app.controller('myCtrl', function ($scope, $mdToast, $log, $mdDialog, $element) 
                                                                                                                 rangeForResLink.values = UrlItem;
                                                                                                                 rangeForResLink.format.autofitColumns();
                                                                                                                 closeDialog();
-                                                                                                                ProgressLinearInActive();
+                                                                                                                ProgressLinearInActive();;
 
                                                                                                             });
-
-
-                                                                                                        });
-
-                                                                                                    });
-                                                                                                });
-                                                                                            };
-                                                                                            if (argsmessage === 'Merged') {
-
-
-                                                                                                Excel.run(function (context) {
-
-                                                                                                    var ResultSheet = context.workbook.worksheets.getItem("Result_" + ActiveSheet);
-                                                                                                    var usedRange = ResultSheet.getUsedRange();
-
-                                                                                                    // Execute the request
-                                                                                                    context.load(usedRange);
-                                                                                                    return context.sync().then(function () {
-                                                                                                        var rowCount = usedRange.rowCount;
-
-                                                                                                        var HeadNames = $scope.UsedSheetValues[0];
-                                                                                                        var markers = [];
-                                                                                                        var lastColName;
-                                                                                                        for (var n = 0; n < HeadNames.length; n++) {
-                                                                                                            var Aplhabet = (n + 10).toString(36).toUpperCase();
-                                                                                                            markers[i] = Actsheet.getRange(Aplhabet + 1);
-                                                                                                            markers[i].values = HeadNames[n];
-                                                                                                            if (n < HeadNames.length) {
-                                                                                                                if (HeadNames[n] != "Result" && HeadNames[n] != "Short Links" && HeadNames[n] != "QR Code") {
-                                                                                                                    lastColName = Aplhabet;
-                                                                                                                }
-                                                                                                            };
-                                                                                                        };
-
-
-
-                                                                                                        var NextColumnForResult = nextLetter(lastColName);
-                                                                                                        var NextColumnForShort = nextLetter(NextColumnForResult);
-                                                                                                        var NextColumnForDate = nextLetter(NextColumnForShort);
-                                                                                                        var NextColumnForQr = nextLetter(NextColumnForDate);
-
-                                                                                                        var fromRangeLink = rowCount + 1;
-                                                                                                        var toRangeLink = fromRangeLink + UrlItem.length - 1;
-                                                                                                        var range_Link = NextColumnForResult + fromRangeLink + ":" + NextColumnForQr + toRangeLink;
-                                                                                                        var rangeForResLink = ResultSheet.getRange(range_Link);
-
-                                                                                                        var rangeForDate = sheet.getRange(NextColumnForDate + ":" + NextColumnForDate); // Replace "A:A" with your desired column range
-                                                                                                        rangeForDate.numberFormat = [["[$-409]m/d/yy h:mm AM/PM;@"]];
-
-
-
-                                                                                                        FinalSheetSet.shift();
-                                                                                                        let data = FinalSheetSet;
-                                                                                                        var FROM = rowCount + 1;
-                                                                                                        var TO = FROM + data.length - 1;
-                                                                                                        var RANEG = "A" + FROM.toString() + ":" + Aplhabet + TO.toString();
-                                                                                                        let range = ResultSheet.getRange(RANEG);
-                                                                                                        range.formulas = data;
-                                                                                                        range.format.autofitColumns();
-
-                                                                                                        var range_LinksRes = NextColumnForResult + fromRangeLink + ":" + NextColumnForResult + toRangeLink;
-                                                                                                        var rangeValOfLinks = ResultSheet.getRange(range_LinksRes);
-
-                                                                                                        rangeValOfLinks.format.wrapText = true;
-                                                                                                        rangeValOfLinks.format.columnWidth = 250;
-
-                                                                                                        ResultSheet.activate();
-
-                                                                                                        return context.sync().then(function () {
-                                                                                                            rangeForResLink.values = UrlItem;
-                                                                                                            rangeForResLink.format.autofitColumns();
-                                                                                                            closeDialog();
-                                                                                                            ProgressLinearInActive();;
-
                                                                                                         });
                                                                                                     });
-                                                                                                });
+                                                                                                };
                                                                                             };
                                                                                         };
-                                                                                    };
-                                                                                } else {
-                                                                                    Excel.run(function (context) {
+                                                                                    } else {
+                                                                                        Excel.run(function (context) {
 
-                                                                                        let sheets = context.workbook.worksheets;
+                                                                                            let sheets = context.workbook.worksheets;
 
-                                                                                        let sheet = sheets.add("Result_" + ActiveSheet);
-                                                                                        sheet.load("name, position");
-
-                                                                                        return context.sync().then(function () {
-
-                                                                                            let ResultSheet = context.workbook.worksheets.getItem("Result_" + ActiveSheet);
-
-
-
-                                                                                            var NextColumnForResult = nextLetter(lastColName);
-                                                                                            var NextColumnForShort = nextLetter(NextColumnForResult);
-                                                                                            var NextColumnForDate = nextLetter(NextColumnForShort);
-                                                                                            var NextColumnForQr = nextLetter(NextColumnForDate);
-                                                                                            var rangeForResHead = ResultSheet.getRange(NextColumnForResult + 1 + ":" + NextColumnForQr + 1);
-                                                                                            rangeForResHead.values = [["Result", "Short Links", "Date", "QR Code"]];
-
-                                                                                            var rangeForDate = sheet.getRange(NextColumnForDate + ":" + NextColumnForDate); // Replace "A:A" with your desired column range
-                                                                                            rangeForDate.numberFormat = [["[$-409]m/d/yy h:mm AM/PM;@"]];
-
-
-
-                                                                                            var toRangeLink = UrlItem.length + 1;
-                                                                                            var range_Link = NextColumnForResult + 2 + ":" + NextColumnForQr + toRangeLink;
-                                                                                            var rangeForResLink = ResultSheet.getRange(range_Link);
-
-
-                                                                                            let data = FinalSheetSet;
-                                                                                            var FROM = 1;
-                                                                                            var TO = FROM + data.length - 1;
-                                                                                            var RANEG = "A" + FROM.toString() + ":" + Aplhabet + TO.toString();
-                                                                                            let range = ResultSheet.getRange(RANEG);
-                                                                                            range.formulas = data;
-                                                                                            range.format.autofitColumns();
-
-                                                                                            var range_LinksRes = NextColumnForResult + 2 + ":" + NextColumnForResult + toRangeLink;
-                                                                                            var rangeValOfLinks = ResultSheet.getRange(range_LinksRes);
-
-                                                                                            rangeValOfLinks.format.wrapText = true;
-                                                                                            rangeValOfLinks.format.columnWidth = 250;
-
-                                                                                            ResultSheet.activate();
+                                                                                            let sheet = sheets.add("Result_" + ActiveSheet);
+                                                                                            sheet.load("name, position");
 
                                                                                             return context.sync().then(function () {
-                                                                                                rangeForResLink.values = UrlItem;
-                                                                                                rangeForResLink.format.autofitColumns();
-                                                                                                ProgressLinearInActive();;
+
+                                                                                                let ResultSheet = context.workbook.worksheets.getItem("Result_" + ActiveSheet);
+
+
+
+                                                                                                var NextColumnForResult = nextLetter(lastColName);
+                                                                                                var NextColumnForShort = nextLetter(NextColumnForResult);
+                                                                                                var NextColumnForDate = nextLetter(NextColumnForShort);
+                                                                                                var NextColumnForQr = nextLetter(NextColumnForDate);
+                                                                                                var rangeForResHead = ResultSheet.getRange(NextColumnForResult + 1 + ":" + NextColumnForQr + 1);
+                                                                                                rangeForResHead.values = [["Result", "Short Links", "Date", "QR Code"]];
+
+                                                                                                var rangeForDate = sheet.getRange(NextColumnForDate + ":" + NextColumnForDate); // Replace "A:A" with your desired column range
+                                                                                                rangeForDate.numberFormat = [["[$-409]m/d/yy h:mm AM/PM;@"]];
+
+
+
+                                                                                                var toRangeLink = UrlItem.length + 1;
+                                                                                                var range_Link = NextColumnForResult + 2 + ":" + NextColumnForQr + toRangeLink;
+                                                                                                var rangeForResLink = ResultSheet.getRange(range_Link);
+
+
+                                                                                                let data = FinalSheetSet;
+                                                                                                var FROM = 1;
+                                                                                                var TO = FROM + data.length - 1;
+                                                                                                var RANEG = "A" + FROM.toString() + ":" + Aplhabet + TO.toString();
+                                                                                                let range = ResultSheet.getRange(RANEG);
+                                                                                                range.formulas = data;
+                                                                                                range.format.autofitColumns();
+
+                                                                                                var range_LinksRes = NextColumnForResult + 2 + ":" + NextColumnForResult + toRangeLink;
+                                                                                                var rangeValOfLinks = ResultSheet.getRange(range_LinksRes);
+
+                                                                                                rangeValOfLinks.format.wrapText = true;
+                                                                                                rangeValOfLinks.format.columnWidth = 250;
+
+                                                                                                ResultSheet.activate();
+
+                                                                                                return context.sync().then(function () {
+                                                                                                    rangeForResLink.values = UrlItem;
+                                                                                                    rangeForResLink.format.autofitColumns();
+                                                                                                    ProgressLinearInActive();;
+
+                                                                                                });
 
                                                                                             });
-
                                                                                         });
-                                                                                    });
-                                                                                };
+                                                                                    };
 
 
-                                                                            }).catch(function (error) {
-                                                                                //     console.log(error);
+                                                                                }).catch(function (error) {
+                                                                                    //     console.log(error);
+
+                                                                                });
 
                                                                             });
 
-                                                                        });
+
+                                                                        } else {
+                                                                            ProgressLinearInActive();;
+                                                                            loadToast("Connection Issue. Please contact support@campaigntrackly.com");
+                                                                        };
 
 
                                                                     } else {
                                                                         ProgressLinearInActive();;
-                                                                        loadToast("Connection Issue. Please contact support@campaigntrackly.com");
+                                                                        loadToast(response.response);
                                                                     };
 
+                                                                    if (!$scope.$$phase) {
+                                                                        $scope.$apply();
+                                                                    };
 
                                                                 } else {
-                                                                    ProgressLinearInActive();;
-                                                                    loadToast(response.response);
+
+                                                                    ProgressLinearInActive();
+                                                                    loadToast("UTM link exists");
                                                                 };
 
-                                                                if (!$scope.$$phase) {
-                                                                    $scope.$apply();
-                                                                };
+
                                                             },
                                                             error: function (error) {
                                                                 if (error.status != 200 && error.status != 500) {
@@ -2341,10 +2428,9 @@ app.controller('myCtrl', function ($scope, $mdToast, $log, $mdDialog, $element) 
 
                                                         var custArr = [];
 
-                                                       // console.log(CustTagForSet);
+                                                        // console.log(CustTagForSet);
 
-                                                        const requiredCusTagsVal = removePropertyNamesAndGetValues(mappedTagsToColumns);
-                                                      //  console.log(requiredCusTagsVal);
+                                                        //  console.log(requiredCusTagsVal);
 
 
                                                         for (let i = 0; i < AllNameUrlArr.length; i++) {
@@ -2364,16 +2450,20 @@ app.controller('myCtrl', function ($scope, $mdToast, $log, $mdDialog, $element) 
                                                             //console.log(requiredCusTags);
 
 
-                                                         
+
                                                             //var reqCusTagVal = convertPropertyNamesToLowercase(mappedTagsToColumns);
                                                             //console.log(reqCusTagVal);
 
 
-
+                                                            let requiredCusTagsVal = [];
 
                                                             if (isSetting) {
+                                                                if (mappedTagsToColumns.length > 0) {
+                                                                    requiredCusTagsVal = removePropertyNamesAndGetValues(mappedTagsToColumns);
 
-                                                                
+                                                                };
+
+
                                                                 PrepareDataApplyTemplate = {
                                                                     "template_id": $scope.SelectedOption.id,
                                                                     "campaign_name": AllNameUrlArr[i].CampaignName,
@@ -2502,34 +2592,34 @@ app.controller('myCtrl', function ($scope, $mdToast, $log, $mdDialog, $element) 
                                                                         }
                                                                     }
 
-                                                                    return -1; 
+                                                                    return -1;
                                                                 }
 
 
                                                                 function convertDateColumnToJSDate(dataArray) {
                                                                     const headerRow = dataArray[0];
 
-                                                                  
+
 
                                                                     const dateColumnIndex = findDateColumnIndex(headerRow);
-                                                            
+
                                                                     if (dateColumnIndex === -1) {
                                                                         //console.error("Date column not found in the data.");
                                                                         return dataArray; // Return the original array if the "DATE" column is not found
                                                                     }
-                                                                    
+
                                                                     for (let i = 1; i < dataArray.length; i++) {
                                                                         const excelDate = dataArray[i][dateColumnIndex];
-                                                                        
+
                                                                         const jsDate = getJsDateTimeFromExcel(excelDate);
                                                                         dataArray[i][dateColumnIndex] = jsDate;
                                                                     }
 
                                                                     return dataArray;
                                                                 }
-                                                                
+
                                                                 const dataArrayWithJSDate = convertDateColumnToJSDate($scope.UsedSheetValues);
-                                                                
+
 
 
 
