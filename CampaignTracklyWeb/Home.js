@@ -1,4 +1,4 @@
-var app = angular.module('myApp', ['ngMaterial'], function ($mdThemingProvider) {
+﻿var app = angular.module('myApp', ['ngMaterial'], function ($mdThemingProvider) {
 
     $mdThemingProvider.theme('default')
         .primaryPalette('green', {
@@ -106,6 +106,37 @@ app.controller('myCtrl', function ($scope, $mdToast, $log, $mdDialog, $element) 
 
 
 
+
+
+        function insertExistingChannel(data) {
+            Excel.run(function (context) {
+
+                let sheet = context.workbook.worksheets.getItem("Settings");
+
+                var mediumColumn = [];
+                var sourceColumn = [];
+
+                data.slice(1).forEach(function (item) {
+                    mediumColumn.push([item.medium]);
+                    sourceColumn.push([item.source]);
+                });
+
+
+                var mediumRange = sheet.getRange("AA1").getResizedRange(mediumColumn.length - 1, 0);
+                var sourceRange = sheet.getRange("AB1").getResizedRange(sourceColumn.length - 1, 0);
+
+                mediumRange.values = mediumColumn;
+                sourceRange.values = sourceColumn;
+
+                return context.sync();
+            }).catch(function (error) {
+                console.error(error);
+            });
+        }
+
+
+
+
         var enterEvent = new KeyboardEvent("keydown", {
             key: "Enter",
             code: "Enter",
@@ -122,21 +153,6 @@ app.controller('myCtrl', function ($scope, $mdToast, $log, $mdDialog, $element) 
             try {
 
 
-
-
-                //Excel.run(function (context) {
-                //    let sheet = context.workbook.worksheets.getActiveWorksheet();
-
-                //    let range = sheet.getRange("A1:Z1");
-                //    range.load("values");
-
-                //    return context.sync()
-                //        .then(function () {
-                //            console.log(range.values);
-                //        });
-                //}).catch(function (error) {
-                //    console.error(error);
-                //});
 
 
                 async function getFirstRowData() {
@@ -170,7 +186,7 @@ app.controller('myCtrl', function ($scope, $mdToast, $log, $mdDialog, $element) 
                         let used_Range = sheet.getRange("A1:Z1");
 
                         used_Range.load("values");
-                        
+
                         await context.sync();
 
                         //console.log(used_Range.values);
@@ -180,14 +196,14 @@ app.controller('myCtrl', function ($scope, $mdToast, $log, $mdDialog, $element) 
                         let columnIndex;
 
                         let targetHeader = "campaign name";
-                        
+
                         for (let colIndex = 0; colIndex < headerRow.length; colIndex++) {
                             if (headerRow[colIndex].toLowerCase() === targetHeader) {
                                 columnIndex = colIndex;
                                 break;
                             }
                         }
-                        
+
                         let columnName = String.fromCharCode(65 + columnIndex);
 
                         console.log("Column Name for '" + targetHeader + "': " + columnName);
@@ -213,6 +229,73 @@ app.controller('myCtrl', function ($scope, $mdToast, $log, $mdDialog, $element) 
                         await context.sync();
                     });
                 };
+
+
+                //async function setNameColumnDropdown() {
+                //    await Excel.run(async function (context) {
+                //        let sheet = context.workbook.worksheets.getActiveWorksheet();
+                //        let used_Range = sheet.getRange("A1:Z1");
+
+                //        used_Range.load("values");
+                //        await context.sync();
+
+                //        let headerRow = used_Range.values[0];
+                //        let columnsToValidate = {
+                //            "campaign name": null,
+                //            "medium": null,
+                //            "source": null
+                //        };
+
+                //        for (let targetHeader in columnsToValidate) {
+                //            for (let colIndex = 0; colIndex < headerRow.length; colIndex++) {
+                //                if (headerRow[colIndex].toLowerCase() === targetHeader) {
+                //                    let columnIndex = colIndex;
+                //                    let columnName = String.fromCharCode(65 + columnIndex);
+                //                    columnsToValidate[targetHeader] = columnName;
+                //                    break;
+                //                }
+                //            }
+                //        }
+
+                //        console.log("Columns to Validate: ", columnsToValidate);
+
+                //        let settingsSheet = context.workbook.worksheets.getItem("Settings");
+
+                //        for (let targetHeader in columnsToValidate) {
+                //            if (columnsToValidate[targetHeader]) {
+                //                let columnName = columnsToValidate[targetHeader];
+                //                let campaignRange = sheet.getRange(`${columnName}2:${columnName}100`); // Adjust range as necessary
+
+                //                let sourceColumn;
+                //                if (targetHeader === "medium") {
+                //                    sourceColumn = "AA";
+                //                } else if (targetHeader === "campaign name") {
+                //                    sourceColumn = "A";
+                //                } else if (targetHeader === "source") {
+                //                    sourceColumn = "AB";
+                //                } else {
+                //                    continue;
+                //                }
+
+                //                let nameSourceRange = settingsSheet.getRange(`${sourceColumn}:${sourceColumn}`);
+
+                //                let approvedListRule = {
+                //                    list: {
+                //                        inCellDropdown: true,
+                //                        source: nameSourceRange
+                //                    }
+                //                };
+
+                //                campaignRange.dataValidation.clear();
+                //                campaignRange.dataValidation.rule = approvedListRule;
+                //            }
+                //        }
+
+                //        await context.sync();
+                //    });
+                //}
+
+
 
 
                 $scope.OpenDialog = function (ev) {
@@ -480,10 +563,15 @@ app.controller('myCtrl', function ($scope, $mdToast, $log, $mdDialog, $element) 
 
                     var address = eventArgs.address;
 
-                    //if (address === "A1" && eventArgs.details.valueAfter === "Campaign Name") {
-                    if (eventArgs.details.valueAfter.toLowerCase() === "campaign name") {
+                    if (address === "A1" && eventArgs.details.valueAfter === "Campaign Name") {
+                    //if (eventArgs.details.valueAfter.toLowerCase() === "campaign name") {
                         setNameColumnDropdown();
                     };
+
+                    //if (["campaign name", "source", "medium"].includes(eventArgs.details.valueAfter.toLowerCase())) {
+                    //    setNameColumnDropdown();
+                    //}
+
 
                     var rowNumber = address.split(":")[0].match(/\d+/)[0];
 
@@ -722,93 +810,92 @@ app.controller('myCtrl', function ($scope, $mdToast, $log, $mdDialog, $element) 
 
                 window.localStorage.removeItem("LastAddress");
 
+
                 $scope.LoadSetting = function () {
+                    // Fetch channel data
+                    function fetchChannelData() {
+                        return $.ajax({
+                            url: 'https://devapp.campaigntrackly.com/wp-json/campaigntrackly/v1/channels',
+                            method: 'GET',
+                            headers: {
+                                'Authorization': 'Bearer ' + APIToken
+                            }
+                        });
+                    }
 
-                    $.ajax({
-                        url: BaseURL + '/wp-json/campaigntrackly/v1/custom_tags',
-                        method: 'GET',
-                        headers: {
-                            'accept': 'application/json',
-                            'Authorization': 'Bearer ' + APIToken
-                        },
-                        success: function (response) {
-                            //console.log(response);
-                            AllCustomTagName = response;
-
-                            Excel.run(function (context) {
-                                var workbook = context.workbook;
-                                var worksheets = workbook.worksheets;
-                                var newSheetName = "Settings";
-
-                                var existingSheet = worksheets.getItemOrNullObject(newSheetName);
-                                existingSheet.load("name");
-
-
-                                return context.sync()
-
-
-                                    .then(function () {
-                                        if (existingSheet.isNullObject) {
-                                            var newSheet = worksheets.add(newSheetName);
-
-                                            newSheet.getRange("B:AZ").clear();
-
-                                            return context.sync()
-                                                .then(function () {
-                                                    loadExistingCampaigns();
-                                                    checkSetings();
-
-                                                });
-                                        } else {
-
-                                            // console.log("already");
-
-                                            var SettingSheet = context.workbook.worksheets.getItem(newSheetName);
-                                            SettingSheet.getRange("B:AZ").clear();
-                                            loadExistingCampaigns();
-                                            checkSetings();
-                                        };
-
-                                    });
-                            }).catch(function (error) {
-                                // console.log(error);
-                            });
+                    // Fetch custom tags
+                    function fetchCustomTags() {
+                        return $.ajax({
+                            url: BaseURL + '/wp-json/campaigntrackly/v1/custom_tags',
+                            method: 'GET',
+                            headers: {
+                                'accept': 'application/json',
+                                'Authorization': 'Bearer ' + APIToken
+                            }
+                        });
+                    }
 
 
-                        },
-                        error: function (error) {
-                            // Handle the error response here
-                            if (error.status != 200 && error.status != 500) {
-                                if (error.responseJSON.statusCode === 403 && error.responseJSON.message === "Expired token") {
-                                    RefreshToken(getFromLocal.refresh_token);
-                                    ProgressLinearActive();
-                                    //   $scope.LoadSetting();
-                                }
-                                else if (error.responseJSON.statusCode === 403 && error.responseJSON.message === "Signature verification failed") {
+                    // Perform both AJAX calls asynchronously
+                    $.when(fetchChannelData(), fetchCustomTags()).then(function (channelResponse, customTagsResponse) {
+                        var channelData = channelResponse[0]; // Channel data response
+                        var customTagsData = customTagsResponse[0]; // Custom tags response
 
-                                    $scope.logOut();
-                                }
-                                else {
-                                    loadToast("Connection Issue. Please contact support@campaigntrackly.com");
-                                };
+                        AllCustomTagName = customTagsData;
+
+                        Excel.run(function (context) {
+                            var workbook = context.workbook;
+                            var worksheets = workbook.worksheets;
+                            var newSheetName = "Settings";
+
+                            var existingSheet = worksheets.getItemOrNullObject(newSheetName);
+                            existingSheet.load("name");
+
+                            return context.sync()
+                                .then(function () {
+                                    if (existingSheet.isNullObject) {
+                                        var newSheet = worksheets.add(newSheetName);
+
+                                        newSheet.getRange("B:AZ").clear();
+
+                                        return context.sync()
+                                            .then(function () {
+                                                insertExistingChannel(channelData); 
+                                                loadExistingCampaigns();
+                                                checkSetings();
+                                            });
+                                    } else {
+                                        var SettingSheet = context.workbook.worksheets.getItem(newSheetName);
+                                        SettingSheet.getRange("B:AZ").clear();
+                                        insertExistingChannel(channelData);
+                                        loadExistingCampaigns();
+                                        checkSetings();
+                                    }
+                                });
+                        }).catch(function (error) {
+                            console.error(error);
+                        });
+                    }).fail(function (jqXHR, textStatus, errorThrown) {
+                        console.error("Error fetching data:", errorThrown);
+                        // Handle the error response here
+                        if (jqXHR.status != 200 && jqXHR.status != 500) {
+                            if (jqXHR.responseJSON.statusCode === 403 && jqXHR.responseJSON.message === "Expired token") {
+                                RefreshToken(getFromLocal.refresh_token);
+                                ProgressLinearActive();
+                                // $scope.LoadSetting();
+                            } else if (jqXHR.responseJSON.statusCode === 403 && jqXHR.responseJSON.message === "Signature verification failed") {
+                                $scope.logOut();
                             } else {
                                 loadToast("Connection Issue. Please contact support@campaigntrackly.com");
-                            };
-
-                            ProgressLinearInActive();
-
+                            }
+                        } else {
+                            loadToast("Connection Issue. Please contact support@campaigntrackly.com");
                         }
+
+                        ProgressLinearInActive();
                     });
-
-
-
-
-
-
-
-
-
                 };
+
 
 
                 function loadExistingCampaigns() {
@@ -931,13 +1018,13 @@ app.controller('myCtrl', function ($scope, $mdToast, $log, $mdDialog, $element) 
 
 
 
-
-
                 var AllCustoms = [];
                 var AllCustomValues = [];
 
                 $scope.onSelectChange = function () {
                     //console.log($scope.SelectedOption);
+
+                    setHeaderChannel();
 
                     AllCustoms = [];
                     AllCustomValues = [];
@@ -988,6 +1075,145 @@ app.controller('myCtrl', function ($scope, $mdToast, $log, $mdDialog, $element) 
                     };
 
                 };
+
+
+
+
+                function getNextAlphabet(char) {
+                    // Convert the character to uppercase to handle lowercase inputs
+                    char = char.toUpperCase();
+
+                    // Check if the input character is a valid alphabet character
+                    if (/^[A-Z]$/.test(char)) {
+                        // Get the ASCII code of the character
+                        const charCode = char.charCodeAt(0);
+
+                        // If the character is 'Z', return 'A'
+                        if (charCode === 90) {
+                            return 'A';
+                        } else {
+                            // Increment the ASCII code by 1 and convert it back to a character
+                            return String.fromCharCode(charCode + 1);
+                        }
+                    } else {
+                        // If the input is not a valid alphabet character, return null
+                        return null;
+                    }
+                }
+
+
+                $scope.checkChennel = async function () {
+                    try {
+                        const result = await Excel.run(async (context) => {
+                            var sheet = context.workbook.worksheets.getActiveWorksheet();
+                            var range = sheet.getUsedRange();
+                            range.load("values");
+
+                            await context.sync();
+                            var firstRowData = range.values[0];
+
+                            console.log(firstRowData);
+
+                            if (firstRowData.includes("Medium") && firstRowData.includes("Source")) {
+                                return true;
+                            } else {
+                                console.log("Channel Header does not exist");
+                                return false;
+                            }
+                        });
+
+                        return result;
+                    } catch (error) {
+                        console.error(error);
+                        return false; // or handle the error as needed
+                    }
+                };
+
+
+
+                async function setHeaderChannel() {
+                    try {
+
+                        let channelHeaderExists = await $scope.checkChennel();
+
+                        if (!channelHeaderExists) {
+
+
+                            await Excel.run(async function (context) {
+                                // Get the active worksheet
+                                const sheet = context.workbook.worksheets.getActiveWorksheet();
+
+                                // Get the used range of the active sheet
+                                const usedRange = sheet.getUsedRange();
+
+                                // Load the address of the used range
+                                usedRange.load("address");
+
+                                // Execute the queued commands and return a promise to indicate task completion
+                                await context.sync();
+
+                                let onlyRange = usedRange.address.split('!')[1];
+
+                                let lastUsedCol = onlyRange.slice(-2, -1);
+
+                                let sourceCol = getNextAlphabet(lastUsedCol);
+                                let mediumCol = getNextAlphabet(sourceCol);
+
+                                let ChannelHeaderRange = sourceCol + "1:" + mediumCol + "1";
+
+                                console.log(ChannelHeaderRange);
+
+                                let ChannelHeader = sheet.getRange(ChannelHeaderRange);
+
+                                ChannelHeader.values = [["Medium", "Source"]];
+
+                                let sourceDDLCell = sheet.getRange(sourceCol + "2");
+                                let mediumDDLCell = sheet.getRange(mediumCol + "2");
+
+                                // Get the name source range from the "Settings" worksheet
+                                const nameSourceRange = context.workbook.worksheets.getItem("Settings").getRange("AA:AA");
+                                const nameMediumRange = context.workbook.worksheets.getItem("Settings").getRange("AB:AB");
+                                // Define the data validation rule
+                                let approvedListRule = {
+                                    list: {
+                                        inCellDropdown: true,
+                                        source: nameSourceRange
+                                    }
+                                };
+
+                                let approvedListRuleMedium = {
+                                    list: {
+                                        inCellDropdown: true,
+                                        source: nameMediumRange
+                                    }
+                                };
+
+                                // Apply data validation to the source column range
+                                sourceDDLCell.dataValidation.rule = approvedListRule;
+                                mediumDDLCell.dataValidation.rule = approvedListRuleMedium;
+
+
+
+
+                                await context.sync();
+                            });
+
+                        } else {
+                            console.log("Channel Header already exists");
+                        };
+
+                    } catch (error) {
+                        console.error(error);
+                    }
+                };
+
+
+
+
+
+
+
+
 
                 $scope.SetAsManual = function () {
                     Excel.run(function (context) {
@@ -1043,9 +1269,7 @@ app.controller('myCtrl', function ($scope, $mdToast, $log, $mdDialog, $element) 
                                     if (headersRow[i] === "" && i != 0 && headersRow[i - 1] != "") {
                                         lastEmptyValueInx = i;
                                     }
-                                }
-
-                           //     let colName = getAlphabeticCharacter(lastEmptyValueInx + 1);
+                                };
 
                                 resolve(lastEmptyValueInx + 1);
                             });
@@ -1236,7 +1460,7 @@ app.controller('myCtrl', function ($scope, $mdToast, $log, $mdDialog, $element) 
 
 
                         // sheet.getUsedRange("B:AZ").clear();
-                        sheet.getRange("B:AZ").clear();
+                        sheet.getRange("B:Z").clear();
 
 
                         data.forEach((item, index) => {

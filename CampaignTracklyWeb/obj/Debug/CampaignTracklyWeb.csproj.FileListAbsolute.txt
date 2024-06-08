@@ -54,6 +54,6 @@ D:\Project\CampaignTrackly\CampaignTrackly\CampaignTracklyWeb\bin\Microsoft.Code
 D:\Project\CampaignTrackly\CampaignTrackly\CampaignTracklyWeb\bin\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.xml
 D:\Project\CampaignTrackly\CampaignTrackly\CampaignTracklyWeb\obj\Debug\CampaignTracklyWeb.csproj.AssemblyReference.cache
 D:\Project\CampaignTrackly\CampaignTrackly\CampaignTracklyWeb\obj\Debug\CampaignTracklyWeb.csproj.CoreCompileInputs.cache
-D:\Project\CampaignTrackly\CampaignTrackly\CampaignTracklyWeb\obj\Debug\CampaignTracklyWeb.csproj.CopyComplete
 D:\Project\CampaignTrackly\CampaignTrackly\CampaignTracklyWeb\obj\Debug\CampaignTracklyWeb.dll
 D:\Project\CampaignTrackly\CampaignTrackly\CampaignTracklyWeb\obj\Debug\CampaignTracklyWeb.pdb
+D:\Project\CampaignTrackly\CampaignTrackly\CampaignTracklyWeb\obj\Debug\Campaign.1EAF37A5.Up2Date
