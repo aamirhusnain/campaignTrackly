@@ -84,6 +84,17 @@ app.controller('myCtrl', function ($scope, $mdToast, $log, $mdDialog, $element) 
         };
 
 
+        $scope.clearSheet = function () {
+            Excel.run(function (context) {
+                var sheet = context.workbook.worksheets.getActiveWorksheet();
+                sheet.getRange().clear();
+                return context.sync();
+            }).catch(function (error) {
+                console.error(error);
+            });
+        };
+
+
         $scope.gptBtn = false;
         $scope.tooltipText = "Ask Chat GPT";
         function startGptLoader() {
@@ -235,7 +246,7 @@ app.controller('myCtrl', function ($scope, $mdToast, $log, $mdDialog, $element) 
 
                         campaignRange.dataValidation.rule = approvedListRule;
                         campaignRange.dataValidation.prompt = {
-                            message: "Select an existing campaign or click on the 'Manually Enter Tag' icon to choose a menu type.",
+                            message: "Select existing campaign or click the 'Manually Enter Tags' icon to type a new one.",
                             showPrompt: true,
                             title: "Campaign Name"
                         };
