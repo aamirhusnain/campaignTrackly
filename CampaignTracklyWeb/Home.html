@@ -105,16 +105,16 @@
 
 
 
-                <md-button class="md-icon-button" ng-click="clearSheet()" style="margin-right:-13px;" aria-label="chat">
+                <!--<md-button class="md-icon-button" ng-click="clearSheet()" style="margin-right:-13px;" aria-label="chat">
                     <md-tooltip md-direction="bottom">Clear Sheet</md-tooltip>
                     <md-icon md-menu-align-target style="margin: auto 3px auto 0;" class="material-icons">disabled_by_default</md-icon>
 
-                </md-button> 
+                </md-button>--> 
                 
                 
                 <md-button class="md-icon-button" ng-click="goToPlaylist()" style="margin-right:-13px;" aria-label="chat">
                     <md-tooltip md-direction="bottom">Campaign Trackly Videos Playlist</md-tooltip>
-                    <md-icon md-menu-align-target style="margin: auto 3px auto 0;" class="material-icons">subscriptions</md-icon>
+                    <md-icon md-menu-align-target style="margin: auto 3px auto 0;" class="material-icons">play_circle</md-icon>
 
                 </md-button>
 
@@ -128,13 +128,25 @@
 
                 <md-button class="md-icon-button" ng-click="SetAsManual()" style="margin-right:-5px;" aria-label="chat">
                     <md-tooltip md-direction="bottom">Manually Enter Tags</md-tooltip>
-                    <md-icon md-menu-align-target style="margin: auto 3px auto 0;" class="material-icons">wysiwyg</md-icon>
+                    <md-icon md-menu-align-target style="margin: auto 3px auto 0;" class="material-icons">draw</md-icon>
                 </md-button>
 
 
                 <md-menu style="margin-right: 0px;">
-                    <md-icon class="favorite-icon" style="font-size: 22px; cursor: pointer; color: white;margin-left:10px;" ng-click="$mdMenu.open()">menu_open</md-icon>
+                    <md-icon class="favorite-icon" style="font-size: 22px; cursor: pointer; color: white;margin-left:10px;" ng-click="$mdMenu.open()">settings</md-icon>
                     <md-menu-content class="md-dense">
+
+                        <md-divider></md-divider>
+                        <md-menu-item>
+                            <md-button ng-click="clearSheet()">
+                                <div layout="row" flex>
+                                    <md-icon md-menu-align-target style="margin: auto 3px auto 0; font-size: 22px" class="material-icons">format_clear</md-icon>
+                                    <span style="margin-left:5px;" md-menu-align-target>Clear Sheet</span>
+                                </div>
+                            </md-button>
+                        </md-menu-item>
+
+
 
                         <md-divider></md-divider>
                         <md-menu-item>
@@ -145,7 +157,10 @@
                                 </div>
                             </md-button>
                         </md-menu-item>
+
                         <md-divider></md-divider>
+
+
                         <md-menu-item>
                             <md-button ng-click="ContactSupport()">
                                 <div layout="row" flex>

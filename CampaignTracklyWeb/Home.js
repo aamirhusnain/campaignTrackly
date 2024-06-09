@@ -85,14 +85,21 @@ app.controller('myCtrl', function ($scope, $mdToast, $log, $mdDialog, $element) 
 
 
         $scope.clearSheet = function () {
-            Excel.run(function (context) {
+            Excel.run(async (context) => {
                 var sheet = context.workbook.worksheets.getActiveWorksheet();
-                sheet.getRange().clear();
-                return context.sync();
+                sheet.load("name");
+
+                await context.sync();
+
+                if (sheet.name !== "Settings") {
+                    sheet.getRange().clear();
+                    await context.sync();
+                };
             }).catch(function (error) {
                 console.error(error);
             });
         };
+
 
 
         $scope.gptBtn = false;
