@@ -1,4 +1,4 @@
-﻿var app = angular.module('myApp', ['ngMaterial'], function ($mdThemingProvider) {
+﻿﻿var app = angular.module('myApp', ['ngMaterial'], function ($mdThemingProvider) {
 
     $mdThemingProvider.theme('default')
         .primaryPalette('green', {
@@ -9,6 +9,53 @@ app.controller('myCtrl', function ($scope, $mdToast, $log, $mdDialog, $element) 
 
 
     ProgressLinearActive();
+
+
+
+    function generateCodeVerifier() {
+        const array = new Uint8Array(32);
+        window.crypto.getRandomValues(array);
+        return Array.from(array, (byte) => ("0" + byte.toString(16)).slice(-2)).join("");
+    }
+
+    function generateCodeChallenge(codeVerifier) {
+        return crypto.subtle.digest("SHA-256", new TextEncoder().encode(codeVerifier)).then((hash) => {
+            return btoa(String.fromCharCode.apply(null, new Uint8Array(hash)))
+                .replace(/\+/g, "-")
+                .replace(/\//g, "_")
+                .replace(/=+$/, "");
+        });
+    }
+
+    let logoutDialog;
+
+    $scope.logout = function () {
+        
+        let logutRedirectURI= "https://aamirhusnain.github.io/campaignTrackly/CampaignTracklyWeb/Templates/logout.html";
+        
+        let logoutURL = `https://dev-7ye0b6zftkobwhvz.us.auth0.com/v2/logout?client_id=hpbcTZOBJtUGwjR0PjNRSIrGYGGZ6fa4&returnTo=${logutRedirectURI}`;
+
+        Office.context.ui.displayDialogAsync(logoutURL, { height: 50, width: 20 }, function (asyncResult) {
+            if (asyncResult.status === Office.AsyncResultStatus.Succeeded) {
+                console.log('Dialog opened successfully:', asyncResult);
+                logoutDialog = asyncResult.value;
+                logoutDialog.addEventHandler(Office.EventType.DialogMessageReceived, function (arg) {
+                    console.log('Message received from dialog:', arg.message);
+                    if (arg.message === "Logout successful") {
+                        // Handle logout success (e.g., navigate to a different page, update UI, etc.)
+                        console.log('Logout was successful.');
+                    }
+                    logoutDialog.close();
+                });
+            } else {
+                console.error('Error opening dialog:', asyncResult.error);
+            }
+        });
+    };
+
+
+
+   
 
     try {
 
@@ -53,7 +100,7 @@ app.controller('myCtrl', function ($scope, $mdToast, $log, $mdDialog, $element) 
 
 
         var BaseURL = "https://devapp.campaigntrackly.com";
-      //    var BaseURL = "https://app.campaigntrackly.com";
+        //   var BaseURL = "https://app.campaigntrackly.com";
 
         /////////// show the started screen to user ///////////
         var checkUser = window.localStorage.getItem("UserVisted");
@@ -337,7 +384,7 @@ app.controller('myCtrl', function ($scope, $mdToast, $log, $mdDialog, $element) 
                     $mdDialog.show({
                         scope: $scope.$new(),
                   //      templateUrl: '/Templates/SheetConfirm.html',
-                        templateUrl: '/campaignTrackly/CampaignTracklyWeb/Templates/SheetConfirm.html',
+                       templateUrl: '/campaignTrackly/CampaignTracklyWeb/Templates/SheetConfirm.html',
                     //      templateUrl: 'https://app.campaigntrackly.com/excel-addin/CampaignTracklyWeb/Templates/SheetConfirm.html',
                         parent: angular.element(document.body),
                         targetEvent: ev,
@@ -738,105 +785,424 @@ app.controller('myCtrl', function ($scope, $mdToast, $log, $mdDialog, $element) 
                     const encrypted = CryptoJS.AES.encrypt(apiKey, encryptionKey);
                     return encrypted.toString();
                 };
+                
+                
+                
+                /////////////////// New Auth Code /////////////
+                
+                
+                
+                
+                
+let loginDialog;
+
+$scope.SignIn = async function () {
+
+
+  try {
+    const domain = "dev4-8sn87rh0bu88b2rz.us.auth0.com";
+    const clientId = "cVQubOWRbtDVF9Mpsy5Vx0EXTzcdkvHM";
+    const redirectUri = "https://aamirhusnain.github.io/campaignTrackly/CampaignTracklyWeb/Templates/RedirectPage.html";
+
+    const responseType = "code";
+    const responseMode = "query";
+    const scope = "openid profile email";
+    const state = btoa(JSON.stringify({ timestamp: Date.now() }));
+    const codeVerifier = generateCodeVerifier();
+    const codeChallenge = await generateCodeChallenge(codeVerifier);
+    const codeChallengeMethod = "S256";
+    const auth0Client = btoa(JSON.stringify({ name: "auth0-react", version: "2.2.4" }));
+
+    localStorage.setItem("code_verifier", codeVerifier);
+
+    const dialogeURL = `https://${domain}/authorize?client_id=${clientId}&scope=${encodeURIComponent(scope)}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=${responseType}&response_mode=${responseMode}&state=${encodeURIComponent(state)}&nonce=${encodeURIComponent(state)}&code_challenge=${codeChallenge}&code_challenge_method=${codeChallengeMethod}&auth0Client=${auth0Client}`;
+
+    console.log(dialogeURL);
+    Office.context.ui.displayDialogAsync(dialogeURL, { height: 80, width: 20 }, function (asyncResult) {
+      console.log(asyncResult);
+      loginDialog = asyncResult.value;
+      loginDialog.addEventHandler(Office.EventType.DialogMessageReceived, processMessage);
+    });
+
+  } catch (error) {
+    console.error("Error during the authentication process:", error);
+  }
+
+
+
+  // const domain = "dev-7ye0b6zftkobwhvz.us.auth0.com";
+  // const clientId = "hpbcTZOBJtUGwjR0PjNRSIrGYGGZ6fa4";
+
+
+  // //const domain = "dev4-8sn87rh0bu88b2rz.us.auth0.com";
+  // //const clientId = "cVQubOWRbtDVF9Mpsy5Vx0EXTzcdkvHM";
+
+
+
+
+  // const redirectUri = "https://localhost:44371/templates/RedirectPage.html";
+
+
+
+
+  // const responseType = "code";
+  // const responseMode = "query";
+  // const scope = "openid profile email";
+  // const state = btoa(JSON.stringify({ timestamp: Date.now() }));
+  // const codeVerifier = generateCodeVerifier();
+  // const codeChallenge = await generateCodeChallenge(codeVerifier);
+  // const codeChallengeMethod = "S256";
+  // const auth0Client = btoa(JSON.stringify({ name: "auth0-react", version: "2.2.4" }));
+
+  // localStorage.setItem("code_verifier", codeVerifier);
+
+  // const dialogeURL = `https://${domain}/authorize?client_id=${clientId}&scope=${encodeURIComponent(scope)}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=${responseType}&response_mode=${responseMode}&state=${encodeURIComponent(state)}&nonce=${encodeURIComponent(state)}&code_challenge=${codeChallenge}&code_challenge_method=${codeChallengeMethod}&auth0Client=${auth0Client}`;
+  // //const dialogeURL = "https://localhost:44371/templates/RedirectPage.html";
+
+  // console.log(dialogeURL);
+  // Office.context.ui.displayDialogAsync(dialogeURL, { height: 50, width: 20 }, function (asyncResult) {
+  //     console.log(asyncResult);
+  //     loginDialog = asyncResult.value;
+  //     loginDialog.addEventHandler(Office.EventType.DialogMessageReceived, processMessage);
+  // });
+};
+
+function processMessage(arg) {
+  const message = arg.message;
+
+  if (message) {
+    // Close the dialog
+    loginDialog.close();
+
+    // Now exchange the authorization code for an access token
+    exchangeAuthorizationCodeForToken(message);
+  } else {
+    console.error("Authorization code not found in the response.");
+  }
+  // getToken(arg.message).then((tokenResponse) => {
+  //     console.log(tokenResponse);
+  //     APIToken = tokenResponse.access_token;
+  //     window.localStorage.setItem("APIToken", JSON.stringify(tokenResponse));
+  //     loginDialog.close();
+  // }).catch((error) => {
+  //     console.error(error);
+  // });
+}
+
+
+async function fetchGPTToken(bearerToken) {
+    const url = `${BaseURL}/wp-json/campaigntrackly/v1/gpt_token`;
+    const headers = {
+        "Content-Type": "application/x-www-form-urlencoded",
+        "Authorization": `Bearer ${bearerToken}`
+    };
+
+    try {
+        const response = await fetch(url, {
+            method: "POST",
+            headers: headers,
+            timeout: 0 // Fetch does not support timeout directly, so you might need to handle this manually if required.
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const result = await response.json();
+        const token = result.data.token;
+
+        $scope.ChatGPTKey = token;
+
+        const encryptedKey = encryptAPIKey($scope.ChatGPTKey, 'ChatGPTKey');
+        window.localStorage.setItem('SecretKey', encryptedKey);
+
+    } catch (error) {
+        console.error("Connection Issue. Please contact support@campaigntrackly.com", error);
+        loadToast("Connection Issue. Please contact support@campaigntrackly.com");
+    }
+}
+
+
+
+async function exchangeAuthorizationCodeForToken(authorizationCode) {
+  const domain = "dev4-8sn87rh0bu88b2rz.us.auth0.com";
+  const clientId = "cVQubOWRbtDVF9Mpsy5Vx0EXTzcdkvHM";
+  const redirectUri = "https://aamirhusnain.github.io/campaignTrackly/CampaignTracklyWeb/Templates/RedirectPage.html";
+
+  const tokenEndpoint = `https://${domain}/oauth/token`;
+  const codeVerifier = localStorage.getItem("code_verifier");
+
+  const tokenRequestBody = {
+    grant_type: "authorization_code",
+    client_id: clientId,
+    code: authorizationCode,
+    redirect_uri: redirectUri,
+    code_verifier: codeVerifier,
+  };
+
+  try {
+    console.log("Exchanging authorization code for access token...");
+    const response = await fetch(tokenEndpoint, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(tokenRequestBody),
+    });
+
+    const tokenResponse = await response.json();
+
+    if (response.ok) {
+      console.log("Access Token:", tokenResponse.access_token);
+
+      // Call the UserInfo API to get user information
+      const userInfo = await callUserInfoAPI(tokenResponse.access_token);
+
+      // Call the CampaignTrackly token API with the user's email and Auth0 token
+      if (userInfo && userInfo.email) {
+        const campaignTracklyToken = await callCampaignTracklyTokenAPI(userInfo.email, tokenResponse.access_token);
+
+        // Use the CampaignTrackly token to call the channels API
+        if (campaignTracklyToken) {
+
+        //   console.log(campaignTracklyToken);
+        await fetchGPTToken(campaignTracklyToken);
+        }
+
+      }
+    } else {
+      console.error("Error exchanging code for token:", tokenResponse);
+    }
+  } catch (error) {
+    console.error("Network error exchanging code for token:", error);
+  }
+}
+
+async function callUserInfoAPI(accessToken) {
+  const domain = "dev4-8sn87rh0bu88b2rz.us.auth0.com";
+  const userInfoEndpoint = `https://${domain}/userinfo`;
+
+  try {
+    console.log("Calling Auth0 UserInfo API...");
+    const response = await fetch(userInfoEndpoint, {
+      method: "GET",
+      headers: {
+        "Authorization": `Bearer ${accessToken}`,
+        "Content-Type": "application/json",
+      },
+    });
+
+    const userInfo = await response.json();
+
+    if (response.ok) {
+      console.log("User Info:", userInfo);
+      return userInfo;
+    } else {
+      console.error("Error calling UserInfo API:", userInfo);
+    }
+  } catch (error) {
+    console.error("Network error calling UserInfo API:", error);
+  }
+  return null;
+}
+
+
+
+
+async function callCampaignTracklyTokenAPI(email, auth0Token) {
+  const campaignTracklyEndpoint = 'https://devapp.campaigntrackly.com/wp-json/campaigntrackly/v1/login';
+
+  const requestBody = new URLSearchParams();
+  requestBody.append('email', email);
+  requestBody.append('auth0_token', auth0Token);
+
+  try {
+    console.log("Calling CampaignTrackly Token API...");
+    const response = await fetch(campaignTracklyEndpoint, {
+      method: 'POST',
+      headers: {
+        'accept': 'application/json',
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: requestBody,
+    });
+
+    const campaignTracklyResponse = await response.json();
+
+    if (response.ok) {
+      console.log("CampaignTrackly Token Response:", campaignTracklyResponse);
+      
+      
+
+      $scope.LoginDiv = true;
+      $scope.MainPageDiv = false;
+      $scope.NavBarDiv = false;
+      
+          if (campaignTracklyResponse.data.token) {
+        APIToken = campaignTracklyResponse.data.token;
+        window.localStorage.setItem("APIToken", JSON.stringify(campaignTracklyResponse.data));
+        
+        
+          $scope.LoadSetting();
+
+        $scope.UserName = undefined;
+        $scope.UserPassword = undefined;
+
+        $scope.getTagTemplates();
+        
+          }
+      
+      
+      return campaignTracklyResponse.data.token;
+    } else {
+      console.error("Error calling CampaignTrackly Token API:", campaignTracklyResponse);
+    }
+  } catch (error) {
+    console.error("Network error calling CampaignTrackly Token API:", error);
+  }
+  return null;
+}
+                
+                
+                
+                
+                
+                ////////////////////////////////////////////////
+                
+                
+                
+                
 
 
 
                 //////////////////////// Sign In ////////////////////////
-                $scope.SignIn = function () {
-                    ProgressLinearActive();
-
-
-                    var settings = {
-                        "url": BaseURL + "/wp-json/campaigntrackly/v1/login",
-                        "method": "POST",
-                        "timeout": 0,
-                        "headers": {
-                            "Content-Type": "application/x-www-form-urlencoded",
-                        },
-                        "data": {
-                            "username": $scope.UserName.trim(),
-                            "password": $scope.UserPassword.trim()
-                        }
-                    };
-
-                    $.ajax(settings).done(function (response) {
-                        //  console.log(response);
-
-                        if (response.statusCode === 200) {
 
 
 
-                            $scope.LoginDiv = true;
-                            $scope.MainPageDiv = false;
-                            $scope.NavBarDiv = false;
-                            if (response.data.token) {
-                                APIToken = response.data.token;
-                                window.localStorage.setItem("APIToken", JSON.stringify(response.data));
+                //const auth0 = new Auth0Client({
+                //    domain: "dev-sqc8vsqw1qbf38cs.us.auth0.com",
+                //    client_id: "lD3jeDPKex8oIFIs4CK4UdRQAW3EnMQO",
+                //    redirect_uri: "https://localhost:44371/templates/RedirectPage.html"
+                //});
+
+
+                //const auth0 = new Auth0Client({
+                //    domain: "dev-7ye0b6zftkobwhvz.us.auth0.com",
+                //    client_id: "hpbcTZOBJtUGwjR0PjNRSIrGYGGZ6fa4",
+                //    redirect_uri: "https://localhost:44371/templates/RedirectPage.html"
+                //});
+
+                //$scope.SignIn = function () {
+
+                //    auth0.loginWithPopup().then((response) => {
+                //        auth0.getUser().then((user) => {
+                //            console.log('User:', user);
+                //            // Handle user information here
+                //        });
+                //    }).catch((error) => {
+                //        console.error('Login failed:', error);
+                //    });
+                //};
 
 
 
 
-                                $.ajax({
-                                    url: BaseURL + "/wp-json/campaigntrackly/v1/gpt_token",
-                                    method: "POST",
-                                    "timeout": 0,
-                                    "headers": {
-                                        "Content-Type": "application/x-www-form-urlencoded"
-                                    },
-                                    "data": {
-                                        "username": $scope.UserName.trim(),
-                                        "password": $scope.UserPassword.trim()
-                                    },
-                                    success: function (result) {
-                                        //console.log(result);
-                                        $scope.ChatGPTKey = result.data.token;
 
-                                        const encryptedKey = encryptAPIKey($scope.ChatGPTKey, 'ChatGPTKey');
-                                        //    console.log(encryptedKey);
-
-                                        window.localStorage.setItem('SecretKey', encryptedKey);
-                                    },
-                                    error: function (error) {
-                                        //     console.log(error);
-                                        loadToast("Connection Issue. Please contact support@campaigntrackly.com");
-                                    }
-                                });
+                //$scope.SignIn = function () {
+                //    ProgressLinearActive();
 
 
-                                $scope.LoadSetting();
+                //    var settings = {
+                //        "url": BaseURL + "/wp-json/campaigntrackly/v1/login",
+                //        "method": "POST",
+                //        "timeout": 0,
+                //        "headers": {
+                //            "Content-Type": "application/x-www-form-urlencoded",
+                //        },
+                //        "data": {
+                //            "username": $scope.UserName.trim(),
+                //            "password": $scope.UserPassword.trim()
+                //        }
+                //    };
 
-                                $scope.UserName = undefined;
-                                $scope.UserPassword = undefined;
+                //    $.ajax(settings).done(function (response) {
+                //        //  console.log(response);
 
-                                $scope.getTagTemplates();
-
-                            };
-
-                        } else {
-                            $scope.LoginDiv = false;
-                            $scope.MainPageDiv = true;
-                            $scope.NavBarDiv = true;
-                            // ProgressLinearInActive();;
-                        };
+                //        if (response.statusCode === 200) {
 
 
 
-                    }).fail(function (error) {
-                        //  console.log(error);
-                        if (error.responseJSON.statusCode) {
+                //            $scope.LoginDiv = true;
+                //            $scope.MainPageDiv = false;
+                //            $scope.NavBarDiv = false;
+                //            if (response.data.token) {
+                //                APIToken = response.data.token;
+                //                window.localStorage.setItem("APIToken", JSON.stringify(response.data));
 
-                            if (error.responseJSON.statusCode === 403 || error.responseJSON.code === "application_passwords_disabled") {
-                                loadToast(error.responseJSON.message, true);
-                            } else {
-                                loadToast("Login Failed", true);
-                            };
-                        };
 
-                        ProgressLinearInActive();
 
-                    });
 
-                };
+                //                $.ajax({
+                //                    url: BaseURL + "/wp-json/campaigntrackly/v1/gpt_token",
+                //                    method: "POST",
+                //                    "timeout": 0,
+                //                    "headers": {
+                //                        "Content-Type": "application/x-www-form-urlencoded"
+                //                    },
+                //                    "data": {
+                //                        "username": $scope.UserName.trim(),
+                //                        "password": $scope.UserPassword.trim()
+                //                    },
+                //                    success: function (result) {
+                //                        //console.log(result);
+                //                        $scope.ChatGPTKey = result.data.token;
+
+                //                        const encryptedKey = encryptAPIKey($scope.ChatGPTKey, 'ChatGPTKey');
+                //                        //    console.log(encryptedKey);
+
+                //                        window.localStorage.setItem('SecretKey', encryptedKey);
+                //                    },
+                //                    error: function (error) {
+                //                        //     console.log(error);
+                //                        loadToast("Connection Issue. Please contact support@campaigntrackly.com");
+                //                    }
+                //                });
+
+
+                //                $scope.LoadSetting();
+
+                //                $scope.UserName = undefined;
+                //                $scope.UserPassword = undefined;
+
+                //                $scope.getTagTemplates();
+
+                //            };
+
+                //        } else {
+                //            $scope.LoginDiv = false;
+                //            $scope.MainPageDiv = true;
+                //            $scope.NavBarDiv = true;
+                //            // ProgressLinearInActive();;
+                //        };
+
+
+
+                //    }).fail(function (error) {
+                //        //  console.log(error);
+                //        if (error.responseJSON.statusCode) {
+
+                //            if (error.responseJSON.statusCode === 403 || error.responseJSON.code === "application_passwords_disabled") {
+                //                loadToast(error.responseJSON.message, true);
+                //            } else {
+                //                loadToast("Login Failed", true);
+                //            };
+                //        };
+
+                //        ProgressLinearInActive();
+
+                //    });
+
+                //};
 
                 var AllCustomTagName = [];
 

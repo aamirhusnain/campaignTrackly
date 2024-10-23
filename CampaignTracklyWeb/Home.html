@@ -34,6 +34,8 @@
     <link rel="stylesheet" href="https://static2.sharepointonline.com/files/fabric/office-ui-fabric-core/9.6.0/css/fabric.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.2/rollups/aes.js" integrity="sha256-/H4YS+7aYb9kJ5OKhFYPUjSJdrtV6AeyJOtTkw6X72o=" crossorigin="anonymous"></script>
 
+    <script src="https://cdn.auth0.com/js/auth0-spa-js/1.13/auth0-spa-js.production.js"></script>
+
 
     <style>
         #searchInput {
@@ -74,7 +76,6 @@
             color: green;
             text-decoration: none;
         }
-
     </style>
 
 
@@ -196,32 +197,34 @@
             <div style="margin-top:10px;">
                 <img style="display:block;margin:auto;border-radius:50%;" src="Images/Button80x80.png" aria-label="Logo Campaign Trackly" />
             </div>
+            <!--
+    <div style="margin-top:30px;">
+        <md-input-container class="md-block">
+            <label>Username</label>
+            <input type="text" ng-model="UserName">
+        </md-input-container>
 
-            <div style="margin-top:30px;">
-                <md-input-container class="md-block">
-                    <label>Username</label>
-                    <input type="text" ng-model="UserName">
-                </md-input-container>
+        <md-input-container class="md-block" style="margin-top: -22px;">
+            <label>Password</label>
+            <input type="password" ng-model="UserPassword">
+        </md-input-container>
 
-                <md-input-container class="md-block" style="margin-top: -22px;">
-                    <label>Password</label>
-                    <input type="password" ng-model="UserPassword">
-                </md-input-container>
+    </div>-->
+            <div style="text-align:center;padding:5px;margin-top:50px;">
+                <!--<md-button type="md-button" ng-click="SignIn()" ng-disabled="!UserName || !UserPassword" style="background-color:green;color:#fff;width:50%;">Login</md-button>-->
+                <md-button type="md-button" ng-click="SignIn()" style="background-color:green;color:#fff;width:50%;">Login</md-button>
+                <!--<md-button type="md-button" ng-click="logout()" style="background-color:green;color:#fff;width:50%;">logout</md-button>-->
 
             </div>
-            <div style="text-align: right; margin-top: -30px;">
+
+            <div style="text-align: center;margin-top:20px;">
                 <a href="https://app.campaigntrackly.com/reset-password/" target="_blank" class="customAnchor">Forgot password?</a>
             </div>
-            <div style="text-align:center;padding:5px;">
-                <md-button type="md-button" ng-click="SignIn()" ng-disabled="!UserName || !UserPassword" style="background-color:green;color:#fff;width:50%;">Login</md-button>
-
-            </div>
-
             <div style="position: fixed; bottom: 10px; width: 100%;">
                 <p style="text-align:center;">No account? <a class="customAnchor" target="_blank" href="https://www.campaigntrackly.com">Register here</a></p>
             </div>
 
-           
+
 
         </div>
 
