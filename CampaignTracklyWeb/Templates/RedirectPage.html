@@ -1,0 +1,46 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <!-- Office JavaScript API -->
+    <script type="text/javascript" src="https://appsforoffice.microsoft.com/lib/1.1/hosted/office.js"></script>
+</head>
+
+<body>
+
+
+
+    <script>
+    $(document).ready(function (e) {
+      Office.onReady(function () {
+        var address_Link = window.location.href;
+
+        console.log(address_Link);
+        var address_arr = address_Link.split("=");
+        var firstParameter = address_arr[0];
+
+        // Check if the URL contains an error parameter
+        if (firstParameter.includes("error")) {
+          var error = address_arr[1];
+          console.error("Error occurred during login:", error);
+
+          // Handle the error appropriately (e.g., display an error message)
+          document.body.innerHTML = "<h1>Error occurred during login: " + error + "</h1>";
+        } else {
+          document.body.innerHTML = "<h1>Login Successfully</h1>";
+
+          // Proceed with token extraction
+          var address_Token = address_arr[1];
+          var Id_Token = address_Token.split("&");
+          var access_token = Id_Token[0];
+          console.log("Access Token:", access_token);
+
+          Office.context.ui.messageParent(access_token);
+        }
+      });
+    });
+    </script>
+</body>
+</html>
