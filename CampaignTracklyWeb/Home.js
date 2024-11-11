@@ -30,12 +30,9 @@ app.controller('myCtrl', function ($scope, $mdToast, $log, $mdDialog, $element) 
     let logoutDialog;
 
     $scope.logout = function () {
-        
-        let logutRedirectURI= "https://aamirhusnain.github.io/campaignTrackly/CampaignTracklyWeb/Templates/logout.html";
-const domain = "dev4-8sn87rh0bu88b2rz.us.auth0.com";
-const clientId = "cVQubOWRbtDVF9Mpsy5Vx0EXTzcdkvHM";
-
-let logoutURL = `https://${domain}/v2/logout?client_id=${clientId}&returnTo=${logutRedirectURI}`;
+          // Define logout URL with only domain and federated parameter
+    const domain = "dev4-8sn87rh0bu88b2rz.us.auth0.com";
+    const logoutURL = `https://${domain}/v2/logout?federated`;
 
 
         Office.context.ui.displayDialogAsync(logoutURL, { height: 50, width: 20 }, function (asyncResult) {
