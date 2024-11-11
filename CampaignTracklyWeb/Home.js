@@ -32,8 +32,11 @@ app.controller('myCtrl', function ($scope, $mdToast, $log, $mdDialog, $element) 
     $scope.logout = function () {
         
         let logutRedirectURI= "https://aamirhusnain.github.io/campaignTrackly/CampaignTracklyWeb/Templates/logout.html";
-        
-        let logoutURL = `https://dev-7ye0b6zftkobwhvz.us.auth0.com/v2/logout?client_id=hpbcTZOBJtUGwjR0PjNRSIrGYGGZ6fa4&returnTo=${logutRedirectURI}`;
+const domain = "dev4-8sn87rh0bu88b2rz.us.auth0.com";
+const clientId = "cVQubOWRbtDVF9Mpsy5Vx0EXTzcdkvHM";
+
+let logoutURL = `https://${domain}/v2/logout?client_id=${clientId}&returnTo=${logutRedirectURI}`;
+
 
         Office.context.ui.displayDialogAsync(logoutURL, { height: 50, width: 20 }, function (asyncResult) {
             if (asyncResult.status === Office.AsyncResultStatus.Succeeded) {
