@@ -802,7 +802,8 @@ $scope.SignIn = async function () {
   try {
     const domain = "dev4-8sn87rh0bu88b2rz.us.auth0.com";
     const clientId = "cVQubOWRbtDVF9Mpsy5Vx0EXTzcdkvHM";
-    const redirectUri = "https://aamirhusnain.github.io/campaignTrackly/CampaignTracklyWeb/Templates/RedirectPage.html";
+      //const redirectUri = "https://aamirhusnain.github.io/campaignTrackly/CampaignTracklyWeb/Templates/RedirectPage.html";
+      const redirectUri = "https://localhost:44371/templates/RedirectPage.html";
 
     const responseType = "code";
     const responseMode = "query";
@@ -927,7 +928,9 @@ async function fetchGPTToken(bearerToken) {
 async function exchangeAuthorizationCodeForToken(authorizationCode) {
   const domain = "dev4-8sn87rh0bu88b2rz.us.auth0.com";
   const clientId = "cVQubOWRbtDVF9Mpsy5Vx0EXTzcdkvHM";
-  const redirectUri = "https://aamirhusnain.github.io/campaignTrackly/CampaignTracklyWeb/Templates/RedirectPage.html";
+    //const redirectUri = "https://aamirhusnain.github.io/campaignTrackly/CampaignTracklyWeb/Templates/RedirectPage.html";
+    const redirectUri = "https://localhost:44371/templates/RedirectPage.html";
+
 
   const tokenEndpoint = `https://${domain}/oauth/token`;
   const codeVerifier = localStorage.getItem("code_verifier");
