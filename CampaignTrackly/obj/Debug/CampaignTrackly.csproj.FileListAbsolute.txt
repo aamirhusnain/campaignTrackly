@@ -1,4 +1,0 @@
-D:\Project\CampaignTrackly\CampaignTrackly\CampaignTrackly\obj\Debug\CampaignTrackly.csproj.AssemblyReference.cache
-D:\Project\CampaignTrackly\CampaignTrackly\CampaignTrackly\obj\Debug\CampaignTrackly.csproj.CoreCompileInputs.cache
-C:\Users\Zia ul Qamar\Source\Repos\aamirhusnain\campaignTrackly\CampaignTrackly\obj\Debug\CampaignTrackly.csproj.AssemblyReference.cache
-C:\Users\Zia ul Qamar\Source\Repos\aamirhusnain\campaignTrackly\CampaignTrackly\obj\Debug\CampaignTrackly.csproj.CoreCompileInputs.cache
