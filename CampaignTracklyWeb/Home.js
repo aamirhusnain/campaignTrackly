@@ -1,4 +1,4 @@
-﻿﻿var app = angular.module('myApp', ['ngMaterial'], function ($mdThemingProvider) {
+﻿var app = angular.module('myApp', ['ngMaterial'], function ($mdThemingProvider) {
 
     $mdThemingProvider.theme('default')
         .primaryPalette('green', {
@@ -29,23 +29,33 @@ app.controller('myCtrl', function ($scope, $mdToast, $log, $mdDialog, $element) 
 
     let logoutDialog;
 
-    $scope.logout = function () {
-          // Define logout URL with only domain and federated parameter
-    const domain = "dev4-8sn87rh0bu88b2rz.us.auth0.com";
-    const logoutURL = `https://${domain}/v2/logout?federated`;
+    $scope.logOut = function () {
+        // Define logout URL with only domain and federated parameter
+        const domain = "dev4-8sn87rh0bu88b2rz.us.auth0.com";
+        const logoutURL = `https://${domain}/v2/logout?federated`;
 
 
         Office.context.ui.displayDialogAsync(logoutURL, { height: 50, width: 20 }, function (asyncResult) {
             if (asyncResult.status === Office.AsyncResultStatus.Succeeded) {
                 console.log('Dialog opened successfully:', asyncResult);
                 logoutDialog = asyncResult.value;
+
+
+                $scope.LoginDiv = false;
+                $scope.MainPageDiv = true;
+                $scope.NavBarDiv = true;
+
+                window.localStorage.removeItem("APIToken");
+                window.localStorage.removeItem("SecretKey");
+                logoutDialog.close();
                 logoutDialog.addEventHandler(Office.EventType.DialogMessageReceived, function (arg) {
                     console.log('Message received from dialog:', arg.message);
                     if (arg.message === "Logout successful") {
                         // Handle logout success (e.g., navigate to a different page, update UI, etc.)
                         console.log('Logout was successful.');
+
                     }
-                    logoutDialog.close();
+                  
                 });
             } else {
                 console.error('Error opening dialog:', asyncResult.error);
@@ -55,7 +65,7 @@ app.controller('myCtrl', function ($scope, $mdToast, $log, $mdDialog, $element) 
 
 
 
-   
+
 
     try {
 
@@ -237,7 +247,7 @@ app.controller('myCtrl', function ($scope, $mdToast, $log, $mdDialog, $element) 
                         return context.sync()
                             .then(function () {
                                 const firstRowData = range.values[0];
-                                
+
                                 const targetHeader = "Campaign Name".toLowerCase();
                                 const lowercasedFirstRowData = firstRowData.map(header => header.toLowerCase());
 
@@ -285,7 +295,7 @@ app.controller('myCtrl', function ($scope, $mdToast, $log, $mdDialog, $element) 
 
                         //var campaignRange = sheet.getRange("A2:A3");
 
-                        const nameSourceRange = context.workbook.worksheets.getItem("Settings").getRange("A:A");
+                        const nameSourceRange = context.workbook.worksheets.getItem("Settings").getRange("A2:A1000");
 
                         let approvedListRule = {
                             list: {
@@ -383,9 +393,9 @@ app.controller('myCtrl', function ($scope, $mdToast, $log, $mdDialog, $element) 
 
                     $mdDialog.show({
                         scope: $scope.$new(),
-                  //      templateUrl: '/Templates/SheetConfirm.html',
-                       templateUrl: '/campaignTrackly/CampaignTracklyWeb/Templates/SheetConfirm.html',
-                    //      templateUrl: 'https://app.campaigntrackly.com/excel-addin/CampaignTracklyWeb/Templates/SheetConfirm.html',
+                        //      templateUrl: '/Templates/SheetConfirm.html',
+                        templateUrl: '/campaignTrackly/CampaignTracklyWeb/Templates/SheetConfirm.html',
+                        //      templateUrl: 'https://app.campaigntrackly.com/excel-addin/CampaignTracklyWeb/Templates/SheetConfirm.html',
                         parent: angular.element(document.body),
                         targetEvent: ev,
                         clickOutsideToClose: false,
@@ -645,7 +655,7 @@ app.controller('myCtrl', function ($scope, $mdToast, $log, $mdDialog, $element) 
                     var address = eventArgs.address;
 
                     if (address === "A1" && eventArgs.details.valueAfter === "Campaign Name") {
-                    //if (eventArgs.details.valueAfter.toLowerCase() === "campaign name") {
+                        //if (eventArgs.details.valueAfter.toLowerCase() === "campaign name") {
                         setNameColumnDropdown();
                     };
 
@@ -785,296 +795,296 @@ app.controller('myCtrl', function ($scope, $mdToast, $log, $mdDialog, $element) 
                     const encrypted = CryptoJS.AES.encrypt(apiKey, encryptionKey);
                     return encrypted.toString();
                 };
-                
-                
-                
+
+
+
                 /////////////////// New Auth Code /////////////
-                
-                
-                
-                
-                
-let loginDialog;
 
-$scope.SignIn = async function () {
 
 
-  try {
-    const domain = "dev4-8sn87rh0bu88b2rz.us.auth0.com";
-    const clientId = "cVQubOWRbtDVF9Mpsy5Vx0EXTzcdkvHM";
-      //const redirectUri = "https://aamirhusnain.github.io/campaignTrackly/CampaignTracklyWeb/Templates/RedirectPage.html";
-      const redirectUri = "https://localhost:44371/templates/RedirectPage.html";
 
-    const responseType = "code";
-    const responseMode = "query";
-    const scope = "openid profile email";
-    const state = btoa(JSON.stringify({ timestamp: Date.now() }));
-    const codeVerifier = generateCodeVerifier();
-    const codeChallenge = await generateCodeChallenge(codeVerifier);
-    const codeChallengeMethod = "S256";
-    const auth0Client = btoa(JSON.stringify({ name: "auth0-react", version: "2.2.4" }));
 
-    localStorage.setItem("code_verifier", codeVerifier);
+                let loginDialog;
 
-    const dialogeURL = `https://${domain}/authorize?client_id=${clientId}&scope=${encodeURIComponent(scope)}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=${responseType}&response_mode=${responseMode}&state=${encodeURIComponent(state)}&nonce=${encodeURIComponent(state)}&code_challenge=${codeChallenge}&code_challenge_method=${codeChallengeMethod}&auth0Client=${auth0Client}`;
+                $scope.SignIn = async function () {
 
-    console.log(dialogeURL);
-    Office.context.ui.displayDialogAsync(dialogeURL, { height: 80, width: 20 }, function (asyncResult) {
-      console.log(asyncResult);
-      loginDialog = asyncResult.value;
-      loginDialog.addEventHandler(Office.EventType.DialogMessageReceived, processMessage);
-    });
 
-  } catch (error) {
-    console.error("Error during the authentication process:", error);
-  }
+                    try {
+                        const domain = "dev4-8sn87rh0bu88b2rz.us.auth0.com";
+                        const clientId = "cVQubOWRbtDVF9Mpsy5Vx0EXTzcdkvHM";
+                        const redirectUri = "https://aamirhusnain.github.io/campaignTrackly/CampaignTracklyWeb/Templates/RedirectPage.html";
+                        //const redirectUri = "https://localhost:44371/templates/RedirectPage.html";
 
+                        const responseType = "code";
+                        const responseMode = "query";
+                        const scope = "openid profile email";
+                        const state = btoa(JSON.stringify({ timestamp: Date.now() }));
+                        const codeVerifier = generateCodeVerifier();
+                        const codeChallenge = await generateCodeChallenge(codeVerifier);
+                        const codeChallengeMethod = "S256";
+                        const auth0Client = btoa(JSON.stringify({ name: "auth0-react", version: "2.2.4" }));
 
+                        localStorage.setItem("code_verifier", codeVerifier);
 
-  // const domain = "dev-7ye0b6zftkobwhvz.us.auth0.com";
-  // const clientId = "hpbcTZOBJtUGwjR0PjNRSIrGYGGZ6fa4";
+                        const dialogeURL = `https://${domain}/authorize?client_id=${clientId}&scope=${encodeURIComponent(scope)}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=${responseType}&response_mode=${responseMode}&state=${encodeURIComponent(state)}&nonce=${encodeURIComponent(state)}&code_challenge=${codeChallenge}&code_challenge_method=${codeChallengeMethod}&auth0Client=${auth0Client}`;
 
+                        console.log(dialogeURL);
+                        Office.context.ui.displayDialogAsync(dialogeURL, { height:70, width: 40 }, function (asyncResult) {
+                            console.log(asyncResult);
+                            loginDialog = asyncResult.value;
+                            loginDialog.addEventHandler(Office.EventType.DialogMessageReceived, processMessage);
+                        });
 
-  // //const domain = "dev4-8sn87rh0bu88b2rz.us.auth0.com";
-  // //const clientId = "cVQubOWRbtDVF9Mpsy5Vx0EXTzcdkvHM";
+                    } catch (error) {
+                        console.error("Error during the authentication process:", error);
+                    }
 
 
 
+                    // const domain = "dev-7ye0b6zftkobwhvz.us.auth0.com";
+                    // const clientId = "hpbcTZOBJtUGwjR0PjNRSIrGYGGZ6fa4";
 
-  // const redirectUri = "https://localhost:44371/templates/RedirectPage.html";
 
+                    // //const domain = "dev4-8sn87rh0bu88b2rz.us.auth0.com";
+                    // //const clientId = "cVQubOWRbtDVF9Mpsy5Vx0EXTzcdkvHM";
 
 
 
-  // const responseType = "code";
-  // const responseMode = "query";
-  // const scope = "openid profile email";
-  // const state = btoa(JSON.stringify({ timestamp: Date.now() }));
-  // const codeVerifier = generateCodeVerifier();
-  // const codeChallenge = await generateCodeChallenge(codeVerifier);
-  // const codeChallengeMethod = "S256";
-  // const auth0Client = btoa(JSON.stringify({ name: "auth0-react", version: "2.2.4" }));
 
-  // localStorage.setItem("code_verifier", codeVerifier);
+                    // const redirectUri = "https://localhost:44371/templates/RedirectPage.html";
 
-  // const dialogeURL = `https://${domain}/authorize?client_id=${clientId}&scope=${encodeURIComponent(scope)}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=${responseType}&response_mode=${responseMode}&state=${encodeURIComponent(state)}&nonce=${encodeURIComponent(state)}&code_challenge=${codeChallenge}&code_challenge_method=${codeChallengeMethod}&auth0Client=${auth0Client}`;
-  // //const dialogeURL = "https://localhost:44371/templates/RedirectPage.html";
 
-  // console.log(dialogeURL);
-  // Office.context.ui.displayDialogAsync(dialogeURL, { height: 50, width: 20 }, function (asyncResult) {
-  //     console.log(asyncResult);
-  //     loginDialog = asyncResult.value;
-  //     loginDialog.addEventHandler(Office.EventType.DialogMessageReceived, processMessage);
-  // });
-};
 
-function processMessage(arg) {
-  const message = arg.message;
 
-  if (message) {
-    // Close the dialog
-    loginDialog.close();
+                    // const responseType = "code";
+                    // const responseMode = "query";
+                    // const scope = "openid profile email";
+                    // const state = btoa(JSON.stringify({ timestamp: Date.now() }));
+                    // const codeVerifier = generateCodeVerifier();
+                    // const codeChallenge = await generateCodeChallenge(codeVerifier);
+                    // const codeChallengeMethod = "S256";
+                    // const auth0Client = btoa(JSON.stringify({ name: "auth0-react", version: "2.2.4" }));
 
-    // Now exchange the authorization code for an access token
-    exchangeAuthorizationCodeForToken(message);
-  } else {
-    console.error("Authorization code not found in the response.");
-  }
-  // getToken(arg.message).then((tokenResponse) => {
-  //     console.log(tokenResponse);
-  //     APIToken = tokenResponse.access_token;
-  //     window.localStorage.setItem("APIToken", JSON.stringify(tokenResponse));
-  //     loginDialog.close();
-  // }).catch((error) => {
-  //     console.error(error);
-  // });
-}
+                    // localStorage.setItem("code_verifier", codeVerifier);
 
+                    // const dialogeURL = `https://${domain}/authorize?client_id=${clientId}&scope=${encodeURIComponent(scope)}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=${responseType}&response_mode=${responseMode}&state=${encodeURIComponent(state)}&nonce=${encodeURIComponent(state)}&code_challenge=${codeChallenge}&code_challenge_method=${codeChallengeMethod}&auth0Client=${auth0Client}`;
+                    // //const dialogeURL = "https://localhost:44371/templates/RedirectPage.html";
 
-async function fetchGPTToken(bearerToken) {
-    const url = `${BaseURL}/wp-json/campaigntrackly/v1/gpt_token`;
-    const headers = {
-        "Content-Type": "application/x-www-form-urlencoded",
-        "Authorization": `Bearer ${bearerToken}`
-    };
-
-    try {
-        const response = await fetch(url, {
-            method: "POST",
-            headers: headers,
-            timeout: 0 // Fetch does not support timeout directly, so you might need to handle this manually if required.
-        });
-
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
-        const result = await response.json();
-        const token = result.data.token;
-
-        $scope.ChatGPTKey = token;
-
-        const encryptedKey = encryptAPIKey($scope.ChatGPTKey, 'ChatGPTKey');
-        window.localStorage.setItem('SecretKey', encryptedKey);
-
-    } catch (error) {
-        console.error("Connection Issue. Please contact support@campaigntrackly.com", error);
-        loadToast("Connection Issue. Please contact support@campaigntrackly.com");
-    }
-}
-
-
-
-async function exchangeAuthorizationCodeForToken(authorizationCode) {
-  const domain = "dev4-8sn87rh0bu88b2rz.us.auth0.com";
-  const clientId = "cVQubOWRbtDVF9Mpsy5Vx0EXTzcdkvHM";
-    //const redirectUri = "https://aamirhusnain.github.io/campaignTrackly/CampaignTracklyWeb/Templates/RedirectPage.html";
-    const redirectUri = "https://localhost:44371/templates/RedirectPage.html";
-
-
-  const tokenEndpoint = `https://${domain}/oauth/token`;
-  const codeVerifier = localStorage.getItem("code_verifier");
-
-  const tokenRequestBody = {
-    grant_type: "authorization_code",
-    client_id: clientId,
-    code: authorizationCode,
-    redirect_uri: redirectUri,
-    code_verifier: codeVerifier,
-  };
-
-  try {
-    console.log("Exchanging authorization code for access token...");
-    const response = await fetch(tokenEndpoint, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(tokenRequestBody),
-    });
-
-    const tokenResponse = await response.json();
-
-    if (response.ok) {
-      console.log("Access Token:", tokenResponse.access_token);
-
-      // Call the UserInfo API to get user information
-      const userInfo = await callUserInfoAPI(tokenResponse.access_token);
-
-      // Call the CampaignTrackly token API with the user's email and Auth0 token
-      if (userInfo && userInfo.email) {
-        const campaignTracklyToken = await callCampaignTracklyTokenAPI(userInfo.email, tokenResponse.access_token);
-
-        // Use the CampaignTrackly token to call the channels API
-        if (campaignTracklyToken) {
-
-        //   console.log(campaignTracklyToken);
-        await fetchGPTToken(campaignTracklyToken);
-        }
-
-      }
-    } else {
-      console.error("Error exchanging code for token:", tokenResponse);
-    }
-  } catch (error) {
-    console.error("Network error exchanging code for token:", error);
-  }
-}
-
-async function callUserInfoAPI(accessToken) {
-  const domain = "dev4-8sn87rh0bu88b2rz.us.auth0.com";
-  const userInfoEndpoint = `https://${domain}/userinfo`;
-
-  try {
-    console.log("Calling Auth0 UserInfo API...");
-    const response = await fetch(userInfoEndpoint, {
-      method: "GET",
-      headers: {
-        "Authorization": `Bearer ${accessToken}`,
-        "Content-Type": "application/json",
-      },
-    });
-
-    const userInfo = await response.json();
-
-    if (response.ok) {
-      console.log("User Info:", userInfo);
-      return userInfo;
-    } else {
-      console.error("Error calling UserInfo API:", userInfo);
-    }
-  } catch (error) {
-    console.error("Network error calling UserInfo API:", error);
-  }
-  return null;
-}
-
-
-
-
-async function callCampaignTracklyTokenAPI(email, auth0Token) {
-  const campaignTracklyEndpoint = 'https://devapp.campaigntrackly.com/wp-json/campaigntrackly/v1/login';
-
-  const requestBody = new URLSearchParams();
-  requestBody.append('email', email);
-  requestBody.append('auth0_token', auth0Token);
-
-  try {
-    console.log("Calling CampaignTrackly Token API...");
-    const response = await fetch(campaignTracklyEndpoint, {
-      method: 'POST',
-      headers: {
-        'accept': 'application/json',
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
-      body: requestBody,
-    });
-
-    const campaignTracklyResponse = await response.json();
-
-    if (response.ok) {
-      console.log("CampaignTrackly Token Response:", campaignTracklyResponse);
-      
-      
-
-      $scope.LoginDiv = true;
-      $scope.MainPageDiv = false;
-      $scope.NavBarDiv = false;
-      
-          if (campaignTracklyResponse.data.token) {
-        APIToken = campaignTracklyResponse.data.token;
-        window.localStorage.setItem("APIToken", JSON.stringify(campaignTracklyResponse.data));
-        
-        
-          $scope.LoadSetting();
-
-        $scope.UserName = undefined;
-        $scope.UserPassword = undefined;
-
-        $scope.getTagTemplates();
-        
-          }
-      
-      
-      return campaignTracklyResponse.data.token;
-    } else {
-      console.error("Error calling CampaignTrackly Token API:", campaignTracklyResponse);
-    }
-  } catch (error) {
-    console.error("Network error calling CampaignTrackly Token API:", error);
-  }
-  return null;
-}
-                
-                
-                
-                
-                
+                    // console.log(dialogeURL);
+                    // Office.context.ui.displayDialogAsync(dialogeURL, { height: 50, width: 20 }, function (asyncResult) {
+                    //     console.log(asyncResult);
+                    //     loginDialog = asyncResult.value;
+                    //     loginDialog.addEventHandler(Office.EventType.DialogMessageReceived, processMessage);
+                    // });
+                };
+
+                function processMessage(arg) {
+                    const message = arg.message;
+
+                    if (message) {
+                        // Close the dialog
+                        loginDialog.close();
+
+                        // Now exchange the authorization code for an access token
+                        exchangeAuthorizationCodeForToken(message);
+                    } else {
+                        console.error("Authorization code not found in the response.");
+                    }
+                    // getToken(arg.message).then((tokenResponse) => {
+                    //     console.log(tokenResponse);
+                    //     APIToken = tokenResponse.access_token;
+                    //     window.localStorage.setItem("APIToken", JSON.stringify(tokenResponse));
+                    //     loginDialog.close();
+                    // }).catch((error) => {
+                    //     console.error(error);
+                    // });
+                }
+
+
+                async function fetchGPTToken(bearerToken) {
+                    const url = `${BaseURL}/wp-json/campaigntrackly/v1/gpt_token`;
+                    const headers = {
+                        "Content-Type": "application/x-www-form-urlencoded",
+                        "Authorization": `Bearer ${bearerToken}`
+                    };
+
+                    try {
+                        const response = await fetch(url, {
+                            method: "POST",
+                            headers: headers,
+                            timeout: 0 // Fetch does not support timeout directly, so you might need to handle this manually if required.
+                        });
+
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! status: ${response.status}`);
+                        }
+
+                        const result = await response.json();
+                        const token = result.data.token;
+
+                        $scope.ChatGPTKey = token;
+
+                        const encryptedKey = encryptAPIKey($scope.ChatGPTKey, 'ChatGPTKey');
+                        window.localStorage.setItem('SecretKey', encryptedKey);
+
+                    } catch (error) {
+                        console.error("Connection Issue. Please contact support@campaigntrackly.com", error);
+                        loadToast("Connection Issue. Please contact support@campaigntrackly.com");
+                    }
+                }
+
+
+
+                async function exchangeAuthorizationCodeForToken(authorizationCode) {
+                    const domain = "dev4-8sn87rh0bu88b2rz.us.auth0.com";
+                    const clientId = "cVQubOWRbtDVF9Mpsy5Vx0EXTzcdkvHM";
+                    const redirectUri = "https://aamirhusnain.github.io/campaignTrackly/CampaignTracklyWeb/Templates/RedirectPage.html";
+                   // const redirectUri = "https://localhost:44371/templates/RedirectPage.html";
+
+
+                    const tokenEndpoint = `https://${domain}/oauth/token`;
+                    const codeVerifier = localStorage.getItem("code_verifier");
+
+                    const tokenRequestBody = {
+                        grant_type: "authorization_code",
+                        client_id: clientId,
+                        code: authorizationCode,
+                        redirect_uri: redirectUri,
+                        code_verifier: codeVerifier,
+                    };
+
+                    try {
+                        console.log("Exchanging authorization code for access token...");
+                        const response = await fetch(tokenEndpoint, {
+                            method: "POST",
+                            headers: {
+                                "Content-Type": "application/json",
+                            },
+                            body: JSON.stringify(tokenRequestBody),
+                        });
+
+                        const tokenResponse = await response.json();
+
+                        if (response.ok) {
+                            console.log("Access Token:", tokenResponse.access_token);
+
+                            // Call the UserInfo API to get user information
+                            const userInfo = await callUserInfoAPI(tokenResponse.access_token);
+
+                            // Call the CampaignTrackly token API with the user's email and Auth0 token
+                            if (userInfo && userInfo.email) {
+                                const campaignTracklyToken = await callCampaignTracklyTokenAPI(userInfo.email, tokenResponse.access_token);
+
+                                // Use the CampaignTrackly token to call the channels API
+                                if (campaignTracklyToken) {
+
+                                    //   console.log(campaignTracklyToken);
+                                    await fetchGPTToken(campaignTracklyToken);
+                                }
+
+                            }
+                        } else {
+                            console.error("Error exchanging code for token:", tokenResponse);
+                        }
+                    } catch (error) {
+                        console.error("Network error exchanging code for token:", error);
+                    }
+                }
+
+                async function callUserInfoAPI(accessToken) {
+                    const domain = "dev4-8sn87rh0bu88b2rz.us.auth0.com";
+                    const userInfoEndpoint = `https://${domain}/userinfo`;
+
+                    try {
+                        console.log("Calling Auth0 UserInfo API...");
+                        const response = await fetch(userInfoEndpoint, {
+                            method: "GET",
+                            headers: {
+                                "Authorization": `Bearer ${accessToken}`,
+                                "Content-Type": "application/json",
+                            },
+                        });
+
+                        const userInfo = await response.json();
+
+                        if (response.ok) {
+                            console.log("User Info:", userInfo);
+                            return userInfo;
+                        } else {
+                            console.error("Error calling UserInfo API:", userInfo);
+                        }
+                    } catch (error) {
+                        console.error("Network error calling UserInfo API:", error);
+                    }
+                    return null;
+                }
+
+
+
+
+                async function callCampaignTracklyTokenAPI(email, auth0Token) {
+                    const campaignTracklyEndpoint = 'https://devapp.campaigntrackly.com/wp-json/campaigntrackly/v1/login';
+
+                    const requestBody = new URLSearchParams();
+                    requestBody.append('email', email);
+                    requestBody.append('auth0_token', auth0Token);
+
+                    try {
+                        console.log("Calling CampaignTrackly Token API...");
+                        const response = await fetch(campaignTracklyEndpoint, {
+                            method: 'POST',
+                            headers: {
+                                'accept': 'application/json',
+                                'Content-Type': 'application/x-www-form-urlencoded',
+                            },
+                            body: requestBody,
+                        });
+
+                        const campaignTracklyResponse = await response.json();
+
+                        if (response.ok) {
+                            console.log("CampaignTrackly Token Response:", campaignTracklyResponse);
+
+
+
+                            $scope.LoginDiv = true;
+                            $scope.MainPageDiv = false;
+                            $scope.NavBarDiv = false;
+
+                            if (campaignTracklyResponse.data.token) {
+                                APIToken = campaignTracklyResponse.data.token;
+                                window.localStorage.setItem("APIToken", JSON.stringify(campaignTracklyResponse.data));
+
+
+                                $scope.LoadSetting();
+
+                                $scope.UserName = undefined;
+                                $scope.UserPassword = undefined;
+
+                                $scope.getTagTemplates();
+
+                            }
+
+
+                            return campaignTracklyResponse.data.token;
+                        } else {
+                            console.error("Error calling CampaignTrackly Token API:", campaignTracklyResponse);
+                        }
+                    } catch (error) {
+                        console.error("Network error calling CampaignTrackly Token API:", error);
+                    }
+                    return null;
+                }
+
+
+
+
+
                 ////////////////////////////////////////////////
-                
-                
-                
-                
+
+
+
+
 
 
 
@@ -1411,7 +1421,10 @@ async function callCampaignTracklyTokenAPI(email, auth0Token) {
                 async function setCampaigns(existingCampaigns) {
                     await Excel.run(async (context) => {
                         let sheet = context.workbook.worksheets.getItem("Settings");
-                        let range = sheet.getRange("A1:A" + (existingCampaigns.length));
+                        let headerRange = sheet.getRange("A1");
+
+                        headerRange.values = [["Campaign Name"]]
+                        let range = sheet.getRange("A2:A" + (existingCampaigns.length + 1));
                         range.values = existingCampaigns;
                         range.format.autofitColumns();
                         // Sync to apply changes
@@ -1516,12 +1529,12 @@ async function callCampaignTracklyTokenAPI(email, auth0Token) {
                             await context.sync();
                             var firstRowData = range.values[0];
 
-                        //    console.log(firstRowData);
+                            //    console.log(firstRowData);
 
                             if (firstRowData.includes("Medium") && firstRowData.includes("Source")) {
                                 return true;
                             } else {
-                             //   console.log("Channel Header does not exist");
+                                //   console.log("Channel Header does not exist");
                                 return false;
                             }
                         });
@@ -1565,7 +1578,7 @@ async function callCampaignTracklyTokenAPI(email, auth0Token) {
 
                                 let ChannelHeaderRange = sourceCol + "1:" + mediumCol + "1";
 
-                             //   console.log(ChannelHeaderRange);
+                                //   console.log(ChannelHeaderRange);
 
                                 let ChannelHeader = sheet.getRange(ChannelHeaderRange);
 
@@ -1594,17 +1607,17 @@ async function callCampaignTracklyTokenAPI(email, auth0Token) {
 
                                 // Apply data validation to the source column range
 
-                               
+
 
                                 sourceDDLCell.dataValidation.rule = approvedListRule;
                                 mediumDDLCell.dataValidation.rule = approvedListRuleMedium;
 
-                           
+
                                 await context.sync();
                             });
 
                         } else {
-                         //   console.log("Channel Header already exists");
+                            //   console.log("Channel Header already exists");
                         };
 
                     } catch (error) {
@@ -1666,7 +1679,7 @@ async function callCampaignTracklyTokenAPI(email, auth0Token) {
                                 range.load("values");
                                 await context.sync();
 
-                             //   console.log(range.values);
+                                //   console.log(range.values);
                                 let headersRow = range.values[0];
 
                                 var lastEmptyValueInx = 1;
@@ -1730,7 +1743,7 @@ async function callCampaignTracklyTokenAPI(email, auth0Token) {
                                 if (data.length > 0) {
 
 
-                                  //  console.log(StartFrom);
+                                    //  console.log(StartFrom);
                                     //var StartFrom = getAlphabeticCharacter(UsedColumn.length + 1);
                                     var EndTo = getAlphabeticCharacter((data.length + StartFromIndx) - 1);
 
@@ -2274,7 +2287,7 @@ async function callCampaignTracklyTokenAPI(email, auth0Token) {
 
 
                                                 function checkValues(usedSheetValues, allCustoms, requiredCustomTags) {
-                                                  
+
                                                     for (let i = 1; i < usedSheetValues.length; i++) {
                                                         const row = usedSheetValues[i];
                                                         for (let j = 0; j < allCustoms.length; j++) {
@@ -2306,7 +2319,7 @@ async function callCampaignTracklyTokenAPI(email, auth0Token) {
                                                 } else {
 
 
-                                                    
+
 
                                                     for (var j = 0; j < AllCustoms.length; j++) {
                                                         var header = AllCustoms[j];
@@ -2316,7 +2329,7 @@ async function callCampaignTracklyTokenAPI(email, auth0Token) {
                                                             var value = row[$scope.UsedSheetValues[0].indexOf(header)];
                                                             if (value === "") {
                                                                 isEmptyValueFound = true;
-                                                                break; 
+                                                                break;
                                                             }
                                                         }
                                                         if (!isEmptyValueFound) {
@@ -2449,7 +2462,7 @@ async function callCampaignTracklyTokenAPI(email, auth0Token) {
                                                 }
 
 
-                                              //  console.log(isCustom);
+                                                //  console.log(isCustom);
 
                                                 //if (isSetting) {
                                                 //    isCustom = true;
@@ -3222,7 +3235,7 @@ async function callCampaignTracklyTokenAPI(email, auth0Token) {
 
                                                             if (!result[0].hasOwnProperty("existed_links")) {
 
-                                                                
+
 
                                                                 var dateIndexs = [];
                                                                 var Headers = $scope.UsedSheetValues[0];
@@ -3843,14 +3856,14 @@ async function callCampaignTracklyTokenAPI(email, auth0Token) {
 
                 //////////////////////// logout ////////////////////////
 
-                $scope.logOut = function () {
-                    $scope.LoginDiv = false;
-                    $scope.MainPageDiv = true;
-                    $scope.NavBarDiv = true;
+                //$scope.logOut = function () {
+                //    $scope.LoginDiv = false;
+                //    $scope.MainPageDiv = true;
+                //    $scope.NavBarDiv = true;
 
-                    window.localStorage.removeItem("APIToken");
-                    window.localStorage.removeItem("SecretKey");
-                };
+                //    window.localStorage.removeItem("APIToken");
+                //    window.localStorage.removeItem("SecretKey");
+                //};
             } catch (error) {
                 console.log(error);
                 $scope.LoginDiv = true;
